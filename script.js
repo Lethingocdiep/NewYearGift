@@ -5,10 +5,10 @@ const envelopeContainer = document.getElementById("envelope-container");
 const messageContainer = document.getElementById("message-container");
 
 const thumpSound = new Audio("audio/thump.mp3");
-const popSound = new Audio("audio/pop.mp3");
+const popSound = document.getElementById("popSound");
 const fireworksFile = "audio/fireworks.mp3"; // tiếng pháo hoa thật
 
-let backgroundMusic; // nhạc nền toàn cục
+let backgroundMusic = document.getElementById("backgroundMusic"); // nhạc nền
 let popPlayed = false; // kiểm tra pop đã phát chưa
 
 /* 🎵 nhịp tim */
@@ -23,13 +23,11 @@ heart.addEventListener("click", () => {
     createMaiRain();
 
     /* 🎶 nhạc nền bắt đầu khi phong bao hiện ra + fade in */
-    if (!backgroundMusic) {
-        backgroundMusic = new Audio("audio/Một_Năm_Mới_Bình_An.mp3");
-        backgroundMusic.volume = 0; // bắt đầu từ 0
+    if (backgroundMusic.paused) {
+        backgroundMusic.volume = 0;
         backgroundMusic.loop = true;
         backgroundMusic.play();
 
-        // fade in âm lượng đến 0.3 (tăng so với trước)
         let targetVolume = 0.3;
         let fadeInInterval = setInterval(() => {
             if (backgroundMusic.volume < targetVolume) {
@@ -54,19 +52,17 @@ document.getElementById("envelope").addEventListener("click", () => {
         popPlayed = true;
     }
 
-    // giảm âm lượng nhạc nền nhẹ khi pháo hoa xuất hiện
-    if (backgroundMusic) {
-        let targetVolume = 0.15; // giảm nhẹ để nhạc vẫn rõ
-        let fadeInterval = setInterval(() => {
-            if (backgroundMusic.volume > targetVolume) {
-                backgroundMusic.volume -= 0.01;
-            } else {
-                clearInterval(fadeInterval);
-            }
-        }, 100);
-    }
+    // giảm nhạc nền nhẹ khi pháo hoa xuất hiện
+    let targetVolume = 0.15;
+    let fadeInterval = setInterval(() => {
+        if (backgroundMusic.volume > targetVolume) {
+            backgroundMusic.volume -= 0.01;
+        } else {
+            clearInterval(fadeInterval);
+        }
+    }, 100);
 
-    launchFireworks(); // bắt đầu hiệu ứng pháo hoa
+    launchFireworks();
 });
 
 /* 🌸 hoa mai rơi */
@@ -96,7 +92,6 @@ let fireworks = [];
 
 function launchFireworks() {
     setInterval(() => {
-        // tạo đợt pháo hoa mới
         fireworks.push({
             x: Math.random() * canvas.width,
             y: canvas.height,
@@ -106,9 +101,9 @@ function launchFireworks() {
             particles: []
         });
 
-        // phát tiếng pháo hoa cho mỗi đợt
-        const fwSound = new Audio(fireworksFile);
-        fwSound.volume = 0.5; // giữ vừa phải để nhạc nền vẫn nổi bật
+        const fwSound = document.getElementById("fireworksSound");
+        fwSound.volume = 0.5;
+        fwSound.currentTime = 0;
         fwSound.play();
     }, 700);
 
@@ -126,7 +121,7 @@ function animateFireworks() {
             if (fw.y <= fw.targetY) {
                 fw.exploded = true;
 
-                for (let p = 0; p < 30; p++) {
+                for (let p = 0; p < 25; p++) { // giảm particle để nhẹ hơn
                     fw.particles.push({
                         x: fw.x,
                         y: fw.y,

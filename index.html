@@ -3,31 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lì xì Tết cho anh yêu</title>
+    <title>Tết Heart</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <!-- Trái tim -->
+    <!-- Container trái tim -->
     <div id="heart-container">
         <img id="heart" src="images/heart.png" alt="heart">
     </div>
 
-    <!-- Phong bao -->
+    <!-- Container phong bao -->
     <div id="envelope-container" class="hidden">
         <img id="envelope" src="images/envelope.png" alt="envelope">
     </div>
 
-    <!-- Nội dung bên trong phong bao -->
+    <!-- Container message -->
     <div id="message-container" class="hidden">
-        <p id="greeting">
-            Chúc anh yêu một năm mới thật bình an, hạnh phúc và luôn nhớ rằng em thương anh rất nhiều 💛
-        </p>
-        <img id="couple-img" src="images/couple.png" alt="couple">
+        <h1>Chúc mừng năm mới!</h1>
     </div>
 
     <!-- Canvas pháo hoa -->
     <canvas id="fireworks-canvas"></canvas>
+
+    <!-- Preload audio -->
+    <audio id="backgroundMusic" src="audio/Một_Năm_Mới_Bình_An.mp3" preload="auto"></audio>
+    <audio id="fireworksSound" src="audio/fireworks.mp3" preload="auto"></audio>
+    <audio id="popSound" src="audio/pop.mp3" preload="auto"></audio>
+
+    <!-- Preload images -->
+    <img src="images/mai.png" style="display:none">
+    <img src="images/heart.png" style="display:none">
+    <img src="images/envelope.png" style="display:none">
 
     <script src="script.js"></script>
 </body>
