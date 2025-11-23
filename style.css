@@ -1,0 +1,81 @@
+body {
+    margin: 0;
+    background: #8b0000;
+    overflow: hidden;
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* Trái tim */
+#heart-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#heart {
+    width: 200px;
+    animation: heartbeat 1s infinite;
+}
+
+@keyframes heartbeat {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.15); }
+    50% { transform: scale(1); }
+}
+
+/* Phong bao */
+#envelope-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#envelope {
+    width: 230px;
+    cursor: pointer;
+}
+
+/* Lời chúc + ảnh */
+#message-container {
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+}
+
+#couple-img {
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 0 15px rgba(255, 200, 200, 0.5);
+    margin-top: 10px;
+}
+
+/* Ẩn hiện */
+.hidden { display: none; }
+
+/* Canvas pháo hoa */
+#fireworks-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+/* Hoa mai rơi */
+.mayflower {
+    position: fixed;
+    top: -50px;
+    width: 35px;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(120vh) rotate(360deg);
+    }
+}
