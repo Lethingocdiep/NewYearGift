@@ -161,3 +161,27 @@ function randomColor() {
     const colors = ["#ff4d4d", "#ffd700", "#ff66cc", "#00ccff", "#ffffff"];
     return colors[Math.floor(Math.random() * colors.length)];
 }
+
+// Rơi nồi thịt kho & bánh tét
+function spawnFood() {
+    const items = ["thit_kho.png", "banh_tet.png"]; // tên file trong folder images
+    const img = document.createElement("img");
+
+    img.src = "images/" + items[Math.floor(Math.random() * items.length)];
+    img.className = "food-floating";
+
+    // Vị trí ngẫu nhiên theo chiều ngang
+    img.style.left = Math.random() * 100 + "vw";
+
+    // Tốc độ rơi ngẫu nhiên cho tự nhiên hơn
+    img.style.animationDuration = (8 + Math.random() * 5) + "s";
+
+    document.body.appendChild(img);
+
+    // Xóa sau khi rơi xong
+    setTimeout(() => img.remove(), 15000);
+}
+
+// Tạo 1 món rơi mỗi 4 giây
+setInterval(spawnFood, 4000);
+
