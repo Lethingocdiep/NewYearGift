@@ -97,3 +97,19 @@ body {
         transform: translateY(120vh) rotate(360deg);
     }
 }
+
+/* Thức ăn rơi nhẹ */
+.food-floating {
+    position: fixed;
+    top: -120px;
+    width: 55px;
+    opacity: 0.9;
+    pointer-events: none;
+    animation: floatFood linear infinite;
+}
+
+@keyframes floatFood {
+    to {
+        transform: translateY(120vh) rotate(180deg);
+    }
+}
