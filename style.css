@@ -3,6 +3,7 @@ body {
     background: #8b0000;
     overflow: hidden;
     font-family: "Segoe UI", sans-serif;
+    color: white; /* Chữ trắng toàn trang */
 }
 
 /* Trái tim */
@@ -19,17 +20,9 @@ body {
 }
 
 @keyframes heartbeat {
-    0% {
-        transform: scale(1);
-    }
-
-    25% {
-        transform: scale(1.15);
-    }
-
-    50% {
-        transform: scale(1);
-    }
+    0% { transform: scale(1); }
+    25% { transform: scale(1.15); }
+    50% { transform: scale(1); }
 }
 
 /* Phong bao */
@@ -54,13 +47,28 @@ body {
     text-align: center;
     width: 90%;
     max-width: 400px;
+    color: white; /* Chữ trắng */
+    text-shadow: 0 0 6px rgba(255,255,255,0.4); /* chữ nổi hơn */
 }
 
+/* Ảnh đôi + viền vàng lấp lánh */
 #couple-img {
     width: 100%;
     border-radius: 16px;
-    box-shadow: 0 0 15px rgba(255, 200, 200, 0.5);
     margin-top: 10px;
+    border: 2px solid gold;
+    box-shadow:
+        0 0 10px rgba(255, 215, 0, 0.6),
+        0 0 20px rgba(255, 215, 0, 0.4),
+        0 0 30px rgba(255, 215, 0, 0.2);
+    animation: goldGlow 2.5s ease-in-out infinite;
+}
+
+/* Hiệu ứng viền vàng lấp lánh */
+@keyframes goldGlow {
+    0% { box-shadow: 0 0 10px rgba(255,215,0,0.7); }
+    50% { box-shadow: 0 0 25px rgba(255,215,0,1); }
+    100% { box-shadow: 0 0 10px rgba(255,215,0,0.7); }
 }
 
 /* Ẩn hiện */
