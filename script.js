@@ -6,66 +6,72 @@ const messageContainer = document.getElementById("message-container");
 
 const thumpSound = new Audio("audio/thump.mp3");
 const popSound = document.getElementById("popSound");
-const fireworksFile = "audio/fireworks.mp3"; // tiếng pháo hoa thật
 
-let backgroundMusic = document.getElementById("backgroundMusic"); // nhạc nền
-let popPlayed = false; // kiểm tra pop đã phát chưa
+let backgroundMusic = document.getElementById("backgroundMusic");
+let popPlayed = false;
 
-/* 🎵 nhịp tim */
+// -------------------- Nhịp tim --------------------
 thumpSound.volume = 0.5;
 thumpSound.play();
 
-/* ❤️ click để hiện phong bao */
+let foodIntervalStarted = false;  // ⬅ kiểm soát việc bắt đầu rơi món ăn
+
+// -------------------- Click trái tim --------------------
 heart.addEventListener("click", () => {
     heartContainer.classList.add("hidden");
     envelopeContainer.classList.remove("hidden");
 
     createMaiRain();
 
-    /* 🎶 nhạc nền bắt đầu khi phong bao hiện ra + fade in */
+    // 🔥 chỉ bắt đầu rơi đồ ăn tại đây
+    if (!foodIntervalStarted) {
+        foodIntervalStarted = true;
+        setInterval(spawnFood, 4000);
+    }
+
+    // Nhạc nền fade-in
     if (backgroundMusic.paused) {
         backgroundMusic.volume = 0;
         backgroundMusic.loop = true;
         backgroundMusic.play();
 
         let targetVolume = 0.3;
-        let fadeInInterval = setInterval(() => {
+        let fadeIn = setInterval(() => {
             if (backgroundMusic.volume < targetVolume) {
                 backgroundMusic.volume += 0.01;
             } else {
                 backgroundMusic.volume = targetVolume;
-                clearInterval(fadeInInterval);
+                clearInterval(fadeIn);
             }
         }, 100);
     }
 });
 
-/* 🎁 mở phong bao */
+// -------------------- Click mở phong bao --------------------
 document.getElementById("envelope").addEventListener("click", () => {
     envelopeContainer.classList.add("hidden");
     messageContainer.classList.remove("hidden");
 
-    // pop chỉ phát 1 lần và ngay lập tức
     if (!popPlayed) {
         popSound.volume = 0.8;
         popSound.play();
         popPlayed = true;
     }
 
-    // giảm nhạc nền nhẹ khi pháo hoa xuất hiện
+    // Giảm nhạc nền khi pháo hoa
     let targetVolume = 0.15;
-    let fadeInterval = setInterval(() => {
+    let fade = setInterval(() => {
         if (backgroundMusic.volume > targetVolume) {
             backgroundMusic.volume -= 0.01;
         } else {
-            clearInterval(fadeInterval);
+            clearInterval(fade);
         }
     }, 100);
 
     launchFireworks();
 });
 
-/* 🌸 hoa mai rơi */
+// -------------------- Hoa mai rơi --------------------
 function createMaiRain() {
     setInterval(() => {
         const flower = document.createElement("img");
@@ -76,12 +82,11 @@ function createMaiRain() {
         flower.style.animationDuration = 4 + Math.random() * 4 + "s";
 
         document.body.appendChild(flower);
-
         setTimeout(() => flower.remove(), 8000);
     }, 250);
 }
 
-/* 🎆 Pháo hoa (canvas) */
+// -------------------- Pháo hoa --------------------
 const canvas = document.getElementById("fireworks-canvas");
 const ctx = canvas.getContext("2d");
 
@@ -121,7 +126,7 @@ function animateFireworks() {
             if (fw.y <= fw.targetY) {
                 fw.exploded = true;
 
-                for (let p = 0; p < 25; p++) { // giảm particle để nhẹ hơn
+                for (let p = 0; p < 25; p++) {
                     fw.particles.push({
                         x: fw.x,
                         y: fw.y,
@@ -162,26 +167,17 @@ function randomColor() {
     return colors[Math.floor(Math.random() * colors.length)];
 }
 
-// Rơi nồi thịt kho & bánh tét
+// -------------------- Rơi thịt kho & bánh tét --------------------
 function spawnFood() {
-    const items = ["thit_kho.png", "banh_tet.png"]; // tên file trong folder images
+    const items = ["thit_kho.png", "banh_tet.png"];
     const img = document.createElement("img");
 
     img.src = "images/" + items[Math.floor(Math.random() * items.length)];
     img.className = "food-floating";
 
-    // Vị trí ngẫu nhiên theo chiều ngang
     img.style.left = Math.random() * 100 + "vw";
-
-    // Tốc độ rơi ngẫu nhiên cho tự nhiên hơn
     img.style.animationDuration = (8 + Math.random() * 5) + "s";
 
     document.body.appendChild(img);
-
-    // Xóa sau khi rơi xong
     setTimeout(() => img.remove(), 15000);
 }
-
-// Tạo 1 món rơi mỗi 4 giây
-setInterval(spawnFood, 4000);
-
