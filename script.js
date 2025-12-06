@@ -4,45 +4,73 @@ const heartContainer = document.getElementById("heart-container");
 const envelopeContainer = document.getElementById("envelope-container");
 const messageContainer = document.getElementById("message-container");
 
+const greeting = document.getElementById("greeting");
+
 const thumpSound = new Audio("audio/thump.mp3");
 const popSound = document.getElementById("popSound");
 
 let backgroundMusic = document.getElementById("backgroundMusic");
 let popPlayed = false;
+let foodIntervalStarted = false;
+
+// -------------------- Text để đánh máy --------------------
+const greetingText = `
+Anh ở nơi xa, còn em gom cả mùa Tết quê mình để gửi sang cho anh từng chút một:
+mùi mai vàng, tiếng pháo giao thừa,
+đến cả nồi thịt kho hột vịt thơm ấm và đòn bánh tét xanh mềm quen thuộc… 💛✨
+
+Nghĩ đến cảnh anh đón Tết một mình,
+tim em lại mềm ra như miếng thịt kho sau mấy tiếng rim lửa nhỏ 🥘💛
+chỉ muốn ôm anh một cái thật chặt cho anh bớt cô đơn 🤍🌿
+
+Năm sau mình đoàn tụ,
+đến cả pháo hoa cũng không sáng bằng nụ cười hai đứa khi đứng cạnh nhau 🎆💫
+
+Em yêu anh… đến mức Tết cũng hóa thành nỗi nhớ mang tên anh 💛
+Hy vọng món quà nhỏ này giúp anh ấm lòng hơn một chút 🍲💛
+`;
+
+function startTyping() {
+    greeting.style.width = "0"; 
+    greeting.textContent = ""; 
+
+    let index = 0;
+    function type() {
+        if (index < greetingText.length) {
+            greeting.textContent += greetingText[index];
+            index++;
+            setTimeout(type, 28); 
+        }
+    }
+    type();
+}
 
 // -------------------- Nhịp tim --------------------
 thumpSound.volume = 0.5;
 thumpSound.play();
 
-let foodIntervalStarted = false;  // ⬅ kiểm soát việc bắt đầu rơi món ăn
-
-// -------------------- Click trái tim --------------------
+// -------------------- Click TIM --------------------
 heart.addEventListener("click", () => {
     heartContainer.classList.add("hidden");
     envelopeContainer.classList.remove("hidden");
 
     createMaiRain();
 
-    // 🔥 chỉ bắt đầu rơi đồ ăn tại đây
     if (!foodIntervalStarted) {
         foodIntervalStarted = true;
         setInterval(spawnFood, 4000);
     }
 
-    // Nhạc nền fade-in
+    // Nhạc nền fade in
     if (backgroundMusic.paused) {
         backgroundMusic.volume = 0;
         backgroundMusic.loop = true;
         backgroundMusic.play();
 
-        let targetVolume = 0.3;
-        let fadeIn = setInterval(() => {
-            if (backgroundMusic.volume < targetVolume) {
+        let vol = setInterval(() => {
+            if (backgroundMusic.volume < 0.3) {
                 backgroundMusic.volume += 0.01;
-            } else {
-                backgroundMusic.volume = targetVolume;
-                clearInterval(fadeIn);
-            }
+            } else clearInterval(vol);
         }, 100);
     }
 });
@@ -58,40 +86,40 @@ document.getElementById("envelope").addEventListener("click", () => {
         popPlayed = true;
     }
 
-    // Giảm nhạc nền khi pháo hoa
-    let targetVolume = 0.15;
+    // Giảm nhạc nền
     let fade = setInterval(() => {
-        if (backgroundMusic.volume > targetVolume) {
+        if (backgroundMusic.volume > 0.15) {
             backgroundMusic.volume -= 0.01;
-        } else {
-            clearInterval(fade);
-        }
+        } else clearInterval(fade);
     }, 100);
 
     launchFireworks();
+
+    // ✨ BẮT ĐẦU GÕ TỪ TỪ
+    startTyping();
 });
 
-// -------------------- Hoa mai rơi --------------------
+// -------------------- Mai rơi --------------------
 function createMaiRain() {
     setInterval(() => {
-        const flower = document.createElement("img");
-        flower.src = "images/mai.png";
-        flower.classList.add("mayflower");
+        const f = document.createElement("img");
+        f.src = "images/mai.png";
+        f.classList.add("mayflower");
 
-        flower.style.left = Math.random() * 100 + "vw";
-        flower.style.animationDuration = 4 + Math.random() * 4 + "s";
+        f.style.left = Math.random() * 100 + "vw";
+        f.style.animationDuration = 4 + Math.random() * 4 + "s";
 
-        document.body.appendChild(flower);
-        setTimeout(() => flower.remove(), 8000);
+        document.body.appendChild(f);
+        setTimeout(() => f.remove(), 8000);
     }, 250);
 }
 
-// -------------------- Pháo hoa --------------------
+// -------------------- Fireworks --------------------
 const canvas = document.getElementById("fireworks-canvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
 let fireworks = [];
 
@@ -100,8 +128,7 @@ function launchFireworks() {
         fireworks.push({
             x: Math.random() * canvas.width,
             y: canvas.height,
-            targetY: Math.random() * canvas.height * 0.4,
-            size: 2,
+            targetY: canvas.height * 0.4 * Math.random(),
             exploded: false,
             particles: []
         });
@@ -112,10 +139,10 @@ function launchFireworks() {
         fwSound.play();
     }, 700);
 
-    animateFireworks();
+    animate();
 }
 
-function animateFireworks() {
+function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     fireworks.forEach((fw, i) => {
@@ -137,13 +164,13 @@ function animateFireworks() {
                 }
             }
         } else {
-            fw.particles.forEach((pt) => {
+            fw.particles.forEach(pt => {
                 pt.x += Math.cos(pt.angle) * pt.speed;
                 pt.y += Math.sin(pt.angle) * pt.speed;
                 pt.life--;
-
                 drawDot(pt.x, pt.y, randomColor());
             });
+
             fw.particles = fw.particles.filter(p => p.life > 0);
         }
 
@@ -152,7 +179,7 @@ function animateFireworks() {
         }
     });
 
-    requestAnimationFrame(animateFireworks);
+    requestAnimationFrame(animate);
 }
 
 function drawDot(x, y, color) {
@@ -163,21 +190,22 @@ function drawDot(x, y, color) {
 }
 
 function randomColor() {
-    const colors = ["#ff4d4d", "#ffd700", "#ff66cc", "#00ccff", "#ffffff"];
-    return colors[Math.floor(Math.random() * colors.length)];
+    const c = ["#ff4d4d", "#ffd700", "#ff66cc", "#00ccff", "#ffffff"];
+    return c[Math.floor(Math.random() * c.length)];
 }
 
-// -------------------- Rơi thịt kho & bánh tét --------------------
+// -------------------- Food falling --------------------
 function spawnFood() {
     const items = ["thit_kho.png", "banh_tet.png"];
-    const img = document.createElement("img");
 
+    const img = document.createElement("img");
     img.src = "images/" + items[Math.floor(Math.random() * items.length)];
-    img.className = "food-floating";
+    img.classList = "food-floating";
 
     img.style.left = Math.random() * 100 + "vw";
     img.style.animationDuration = (8 + Math.random() * 5) + "s";
 
     document.body.appendChild(img);
+
     setTimeout(() => img.remove(), 15000);
 }
