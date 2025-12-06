@@ -1,9 +1,7 @@
 const heart = document.getElementById("heart");
 const heartContainer = document.getElementById("heart-container");
-
 const envelopeContainer = document.getElementById("envelope-container");
 const messageContainer = document.getElementById("message-container");
-
 const greeting = document.getElementById("greeting");
 
 const thumpSound = new Audio("audio/thump.mp3");
@@ -13,7 +11,9 @@ let backgroundMusic = document.getElementById("backgroundMusic");
 let popPlayed = false;
 let foodIntervalStarted = false;
 
-// -------------------- Text để đánh máy --------------------
+// ------------------------------------
+// TEXT GÕ TỪ TỪ
+// ------------------------------------
 const greetingText = `
 Anh ở nơi xa, còn em gom cả mùa Tết quê mình để gửi sang cho anh từng chút một:
 mùi mai vàng, tiếng pháo giao thừa,
@@ -31,25 +31,28 @@ Hy vọng món quà nhỏ này giúp anh ấm lòng hơn một chút 🍲💛
 `;
 
 function startTyping() {
-    greeting.style.width = "0"; 
-    greeting.textContent = ""; 
+    greeting.textContent = "";
+    let i = 0;
 
-    let index = 0;
     function type() {
-        if (index < greetingText.length) {
-            greeting.textContent += greetingText[index];
-            index++;
-            setTimeout(type, 28); 
+        if (i < greetingText.length) {
+            greeting.textContent += greetingText[i];
+            i++;
+            setTimeout(type, 28);
         }
     }
     type();
 }
 
-// -------------------- Nhịp tim --------------------
+// ------------------------------------
+// Nhịp tim ban đầu
+// ------------------------------------
 thumpSound.volume = 0.5;
 thumpSound.play();
 
-// -------------------- Click TIM --------------------
+// ------------------------------------
+// CLICK TRÁI TIM
+// ------------------------------------
 heart.addEventListener("click", () => {
     heartContainer.classList.add("hidden");
     envelopeContainer.classList.remove("hidden");
@@ -75,7 +78,9 @@ heart.addEventListener("click", () => {
     }
 });
 
-// -------------------- Click mở phong bao --------------------
+// ------------------------------------
+// MỞ PHONG BAO
+// ------------------------------------
 document.getElementById("envelope").addEventListener("click", () => {
     envelopeContainer.classList.add("hidden");
     messageContainer.classList.remove("hidden");
@@ -86,7 +91,7 @@ document.getElementById("envelope").addEventListener("click", () => {
         popPlayed = true;
     }
 
-    // Giảm nhạc nền
+    // giảm nhạc nền
     let fade = setInterval(() => {
         if (backgroundMusic.volume > 0.15) {
             backgroundMusic.volume -= 0.01;
@@ -94,12 +99,12 @@ document.getElementById("envelope").addEventListener("click", () => {
     }, 100);
 
     launchFireworks();
-
-    // ✨ BẮT ĐẦU GÕ TỪ TỪ
     startTyping();
 });
 
-// -------------------- Mai rơi --------------------
+// ------------------------------------
+// HOA MAI RƠI
+// ------------------------------------
 function createMaiRain() {
     setInterval(() => {
         const f = document.createElement("img");
@@ -114,7 +119,9 @@ function createMaiRain() {
     }, 250);
 }
 
-// -------------------- Fireworks --------------------
+// ------------------------------------
+// FIREWORKS
+// ------------------------------------
 const canvas = document.getElementById("fireworks-canvas");
 const ctx = canvas.getContext("2d");
 
@@ -133,10 +140,10 @@ function launchFireworks() {
             particles: []
         });
 
-        const fwSound = document.getElementById("fireworksSound");
-        fwSound.volume = 0.5;
-        fwSound.currentTime = 0;
-        fwSound.play();
+        const sound = document.getElementById("fireworksSound");
+        sound.volume = 0.5;
+        sound.currentTime = 0;
+        sound.play();
     }, 700);
 
     animate();
@@ -152,7 +159,6 @@ function animate() {
 
             if (fw.y <= fw.targetY) {
                 fw.exploded = true;
-
                 for (let p = 0; p < 25; p++) {
                     fw.particles.push({
                         x: fw.x,
@@ -194,7 +200,9 @@ function randomColor() {
     return c[Math.floor(Math.random() * c.length)];
 }
 
-// -------------------- Food falling --------------------
+// ------------------------------------
+// FOOD FLOATING
+// ------------------------------------
 function spawnFood() {
     const items = ["thit_kho.png", "banh_tet.png"];
 
@@ -210,22 +218,18 @@ function spawnFood() {
     setTimeout(() => img.remove(), 15000);
 }
 
-/* ------------------------------------------
-   🎆 Hiệu ứng pháo hoa đồng loạt khi quay lại tab
-------------------------------------------- */
-
-// tạo nhiều pháo hoa cùng lúc
+// ------------------------------------
+// PHÁO HOA ĐỒNG LOẠT KHI QUAY LẠI
+// ------------------------------------
 function burstFireworks() {
-    for (let i = 0; i < 15; i++) {  
+    for (let i = 0; i < 15; i++) {
         fireworks.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height * 0.6 + canvas.height * 0.2,
-            targetY: Math.random() * canvas.height * 0.4,
-            size: 2,
             exploded: true,
             particles: Array.from({length: 35}, () => ({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height * 0.6 + canvas.height * 0.2,
+                x: canvas.width * Math.random(),
+                y: canvas.height * 0.2 + Math.random() * canvas.height * 0.6,
                 angle: Math.random() * Math.PI * 2,
                 speed: 2 + Math.random() * 3,
                 life: 40 + Math.random() * 20
@@ -233,20 +237,16 @@ function burstFireworks() {
         });
     }
 
-    // phát âm thanh pháo hoa lớn
-    const fwSound = document.getElementById("fireworksSound");
-    fwSound.volume = 1;
-    fwSound.currentTime = 0;
-    fwSound.play();
+    const sound = document.getElementById("fireworksSound");
+    sound.volume = 1;
+    sound.currentTime = 0;
+    sound.play();
 }
 
-// trigger khi người dùng quay lại tab
 document.addEventListener("visibilitychange", () => {
     if (!document.hidden) {
-        // chỉ nổ pháo hoa nếu user đã mở phong bao (đã xem nội dung)
         if (!messageContainer.classList.contains("hidden")) {
             burstFireworks();
         }
     }
 });
-
