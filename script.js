@@ -209,3 +209,44 @@ function spawnFood() {
 
     setTimeout(() => img.remove(), 15000);
 }
+
+/* ------------------------------------------
+   🎆 Hiệu ứng pháo hoa đồng loạt khi quay lại tab
+------------------------------------------- */
+
+// tạo nhiều pháo hoa cùng lúc
+function burstFireworks() {
+    for (let i = 0; i < 15; i++) {  
+        fireworks.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height * 0.6 + canvas.height * 0.2,
+            targetY: Math.random() * canvas.height * 0.4,
+            size: 2,
+            exploded: true,
+            particles: Array.from({length: 35}, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height * 0.6 + canvas.height * 0.2,
+                angle: Math.random() * Math.PI * 2,
+                speed: 2 + Math.random() * 3,
+                life: 40 + Math.random() * 20
+            }))
+        });
+    }
+
+    // phát âm thanh pháo hoa lớn
+    const fwSound = document.getElementById("fireworksSound");
+    fwSound.volume = 1;
+    fwSound.currentTime = 0;
+    fwSound.play();
+}
+
+// trigger khi người dùng quay lại tab
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+        // chỉ nổ pháo hoa nếu user đã mở phong bao (đã xem nội dung)
+        if (!messageContainer.classList.contains("hidden")) {
+            burstFireworks();
+        }
+    }
+});
+
