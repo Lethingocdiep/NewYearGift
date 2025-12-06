@@ -6,66 +6,72 @@ const messageContainer = document.getElementById("message-container");
 
 const thumpSound = new Audio("audio/thump.mp3");
 const popSound = document.getElementById("popSound");
-const fireworksFile = "audio/fireworks.mp3"; // tiếng pháo hoa thật
 
-let backgroundMusic = document.getElementById("backgroundMusic"); // nhạc nền
-let popPlayed = false; // kiểm tra pop đã phát chưa
+let backgroundMusic = document.getElementById("backgroundMusic");
+let popPlayed = false;
 
-/* 🎵 nhịp tim */
+// -------------------- Nhịp tim --------------------
 thumpSound.volume = 0.5;
 thumpSound.play();
 
-/* ❤️ click để hiện phong bao */
+let foodIntervalStarted = false;  // ⬅ kiểm soát việc bắt đầu rơi món ăn
+
+// -------------------- Click trái tim --------------------
 heart.addEventListener("click", () => {
     heartContainer.classList.add("hidden");
     envelopeContainer.classList.remove("hidden");
 
     createMaiRain();
 
-    /* 🎶 nhạc nền bắt đầu khi phong bao hiện ra + fade in */
+    // 🔥 chỉ bắt đầu rơi đồ ăn tại đây
+    if (!foodIntervalStarted) {
+        foodIntervalStarted = true;
+        setInterval(spawnFood, 4000);
+    }
+
+    // Nhạc nền fade-in
     if (backgroundMusic.paused) {
         backgroundMusic.volume = 0;
         backgroundMusic.loop = true;
         backgroundMusic.play();
 
         let targetVolume = 0.3;
-        let fadeInInterval = setInterval(() => {
+        let fadeIn = setInterval(() => {
             if (backgroundMusic.volume < targetVolume) {
                 backgroundMusic.volume += 0.01;
             } else {
                 backgroundMusic.volume = targetVolume;
-                clearInterval(fadeInInterval);
+                clearInterval(fadeIn);
             }
         }, 100);
     }
 });
 
-/* 🎁 mở phong bao */
+// -------------------- Click mở phong bao --------------------
 document.getElementById("envelope").addEventListener("click", () => {
     envelopeContainer.classList.add("hidden");
     messageContainer.classList.remove("hidden");
 
-    // pop chỉ phát 1 lần và ngay lập tức
     if (!popPlayed) {
         popSound.volume = 0.8;
         popSound.play();
         popPlayed = true;
     }
 
-    // giảm nhạc nền nhẹ khi pháo hoa xuất hiện
+    // Giảm nhạc nền khi pháo hoa
     let targetVolume = 0.15;
-    let fadeInterval = setInterval(() => {
+    let fade = setInterval(() => {
         if (backgroundMusic.volume > targetVolume) {
             backgroundMusic.volume -= 0.01;
         } else {
-            clearInterval(fadeInterval);
+            clearInterval(fade);
         }
     }, 100);
 
     launchFireworks();
 });
 
-/* 🌸 hoa mai rơi */
+// -------------------- Hoa mai rơi --------------------
 function createMaiRain() {
     setInterval(() => {
         const flower = document.createElement("img");
@@ -76,12 +82,11 @@ function createMaiRain() {
         flower.style.animationDuration = 4 + Math.random() * 4 + "s";
 
         document.body.appendChild(flower);
-
         setTimeout(() => flower.remove(), 8000);
     }, 250);
 }
 
-/* 🎆 Pháo hoa (canvas) */
+// -------------------- Pháo hoa --------------------
 const canvas = document.getElementById("fireworks-canvas");
 const ctx = canvas.getContext("2d");
 
@@ -121,7 +126,7 @@ function animateFireworks() {
             if (fw.y <= fw.targetY) {
                 fw.exploded = true;
 
-                for (let p = 0; p < 25; p++) { // giảm particle để nhẹ hơn
+                for (let p = 0; p < 25; p++) {
                     fw.particles.push({
                         x: fw.x,
                         y: fw.y,
@@ -161,3 +166,58 @@ function randomColor() {
     const colors = ["#ff4d4d", "#ffd700", "#ff66cc", "#00ccff", "#ffffff"];
     return colors[Math.floor(Math.random() * colors.length)];
 }
+
+// -------------------- Rơi thịt kho & bánh tét --------------------
+function spawnFood() {
+    const items = ["thit_kho.png", "banh_tet.png"];
+    const img = document.createElement("img");
+
+    img.src = "images/" + items[Math.floor(Math.random() * items.length)];
+    img.className = "food-floating";
+
+    img.style.left = Math.random() * 100 + "vw";
+    img.style.animationDuration = (8 + Math.random() * 5) + "s";
+
+    document.body.appendChild(img);
+    setTimeout(() => img.remove(), 15000);
+}
+
+/* ------------------------------------------
+   🎆 Hiệu ứng pháo hoa đồng loạt khi quay lại tab
+------------------------------------------- */
+
+// tạo nhiều pháo hoa cùng lúc
+function burstFireworks() {
+    for (let i = 0; i < 15; i++) {  
+        fireworks.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height * 0.6 + canvas.height * 0.2,
+            targetY: Math.random() * canvas.height * 0.4,
+            size: 2,
+            exploded: true,
+            particles: Array.from({length: 35}, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height * 0.6 + canvas.height * 0.2,
+                angle: Math.random() * Math.PI * 2,
+                speed: 2 + Math.random() * 3,
+                life: 40 + Math.random() * 20
+            }))
+        });
+    }
+
+    // phát âm thanh pháo hoa lớn
+    const fwSound = document.getElementById("fireworksSound");
+    fwSound.volume = 1;
+    fwSound.currentTime = 0;
+    fwSound.play();
+}
+
+// trigger khi người dùng quay lại tab
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+        // chỉ nổ pháo hoa nếu user đã mở phong bao (đã xem nội dung)
+        if (!messageContainer.classList.contains("hidden")) {
+            burstFireworks();
+        }
+    }
+});
