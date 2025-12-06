@@ -3,7 +3,7 @@ body {
     background: #8b0000;
     overflow: hidden;
     font-family: "Segoe UI", sans-serif;
-    color: white; /* Chữ trắng toàn trang */
+    color: white;
 }
 
 /* Trái tim */
@@ -18,7 +18,6 @@ body {
     width: 200px;
     animation: heartbeat 1s infinite;
 }
-
 @keyframes heartbeat {
     0% { transform: scale(1); }
     25% { transform: scale(1.15); }
@@ -32,13 +31,12 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
 }
-
 #envelope {
     width: 230px;
     cursor: pointer;
 }
 
-/* Lời chúc + ảnh */
+/* Message + ảnh */
 #message-container {
     position: absolute;
     top: 55%;
@@ -47,11 +45,31 @@ body {
     text-align: center;
     width: 90%;
     max-width: 400px;
-    color: white; /* Chữ trắng */
-    text-shadow: 0 0 6px rgba(255,255,255,0.4); /* chữ nổi hơn */
+    color: white;
+    text-shadow: 0 0 6px rgba(255,255,255,0.4);
 }
 
-/* Ảnh đôi + viền vàng lấp lánh */
+/* Hiệu ứng viết tay */
+#greeting {
+    white-space: pre-line;
+    font-size: 17px;
+    font-family: "Segoe Script", "Brush Script MT", cursive;
+    overflow: hidden;
+    border-right: 2px solid rgba(255,255,255,0.6);
+    width: 0;
+    margin: auto;
+    animation: typing 6s steps(200, end) forwards, blinkCursor .6s step-end infinite;
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+@keyframes blinkCursor {
+    50% { border-color: transparent; }
+}
+
+/* Ảnh đôi */
 #couple-img {
     width: 100%;
     border-radius: 16px;
@@ -63,20 +81,18 @@ body {
         0 0 30px rgba(255, 215, 0, 0.2);
     animation: goldGlow 2.5s ease-in-out infinite;
 }
-
-/* Hiệu ứng viền vàng lấp lánh */
 @keyframes goldGlow {
     0% { box-shadow: 0 0 10px rgba(255,215,0,0.7); }
     50% { box-shadow: 0 0 25px rgba(255,215,0,1); }
     100% { box-shadow: 0 0 10px rgba(255,215,0,0.7); }
 }
 
-/* Ẩn hiện */
+/* Hidden */
 .hidden {
     display: none;
 }
 
-/* Canvas pháo hoa */
+/* Fireworks */
 #fireworks-canvas {
     position: fixed;
     top: 0;
@@ -84,21 +100,18 @@ body {
     pointer-events: none;
 }
 
-/* Hoa mai rơi */
+/* Mai rơi */
 .mayflower {
     position: fixed;
     top: -50px;
     width: 35px;
     animation: fall linear infinite;
 }
-
 @keyframes fall {
-    to {
-        transform: translateY(120vh) rotate(360deg);
-    }
+    to { transform: translateY(120vh) rotate(360deg); }
 }
 
-/* Thức ăn rơi nhẹ */
+/* Food */
 .food-floating {
     position: fixed;
     top: -120px;
@@ -107,9 +120,6 @@ body {
     pointer-events: none;
     animation: floatFood linear infinite;
 }
-
 @keyframes floatFood {
-    to {
-        transform: translateY(120vh) rotate(180deg);
-    }
+    to { transform: translateY(120vh) rotate(180deg); }
 }
