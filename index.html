@@ -1,48 +1,29 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lì xì Tết cho anh yêu</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <!-- Trái tim -->
-    <div id="heart-container">
-        <img id="heart" src="images/heart.png" alt="heart">
-    </div>
-
-    <!-- Phong bao -->
-    <div id="envelope-container" class="hidden">
-        <img id="envelope" src="images/envelope.png" alt="envelope">
-    </div>
-
-    <!-- Nội dung bên trong phong bao -->
-    <div id="message-container" class="hidden">
-        <p id="greeting">
-            Chúc anh yêu một năm mới thật bình an, hạnh phúc và luôn nhớ rằng em thương anh rất nhiều 💛
-        </p>
-        <img id="couple-img" src="images/couple.jpg" alt="couple">
-    </div>
-
-    <!-- Canvas pháo hoa -->
     <canvas id="fireworks-canvas"></canvas>
 
-    <!-- Preload audio -->
-    <audio id="backgroundMusic" src="audio/Một_Năm_Mới_Bình_An.mp3" preload="auto"></audio>
-    <audio id="fireworksSound" src="audio/fireworks.mp3" preload="auto"></audio>
-    <audio id="popSound" src="audio/pop.mp3" preload="auto"></audio>
+    <img id="heart" src="images/heart.png">
+    <div id="heart-container"></div>
 
-    <!-- Preload images -->
-    <img src="images/mai.png" style="display:none">
-    <img src="images/heart.png" style="display:none">
-    <img src="images/envelope.png" style="display:none">
+    <div id="envelope-container">
+        <img id="envelope" src="images/envelope.png">
+    </div>
 
+    <div id="message-container" class="hidden">
+        <pre id="greeting"></pre>
+        <img id="couple-img" src="images/couple.png">
+    </div>
 
     <script src="script.js"></script>
 </body>
-
 </html>

@@ -1,163 +1,123 @@
-const heart = document.getElementById("heart");
-const heartContainer = document.getElementById("heart-container");
+// ---------------------------
+// VARIABLES
+// ---------------------------
+const envelope = document.getElementById("envelope");
+const messageBox = document.getElementById("message-container");
+const greeting = document.getElementById("greeting");
 
-const envelopeContainer = document.getElementById("envelope-container");
-const messageContainer = document.getElementById("message-container");
-
-const thumpSound = new Audio("audio/thump.mp3");
-const popSound = document.getElementById("popSound");
-const fireworksFile = "audio/fireworks.mp3"; // tiếng pháo hoa thật
-
-let backgroundMusic = document.getElementById("backgroundMusic"); // nhạc nền
-let popPlayed = false; // kiểm tra pop đã phát chưa
-
-/* 🎵 nhịp tim */
-thumpSound.volume = 0.5;
-thumpSound.play();
-
-/* ❤️ click để hiện phong bao */
-heart.addEventListener("click", () => {
-    heartContainer.classList.add("hidden");
-    envelopeContainer.classList.remove("hidden");
-
-    createMaiRain();
-
-    /* 🎶 nhạc nền bắt đầu khi phong bao hiện ra + fade in */
-    if (backgroundMusic.paused) {
-        backgroundMusic.volume = 0;
-        backgroundMusic.loop = true;
-        backgroundMusic.play();
-
-        let targetVolume = 0.3;
-        let fadeInInterval = setInterval(() => {
-            if (backgroundMusic.volume < targetVolume) {
-                backgroundMusic.volume += 0.01;
-            } else {
-                backgroundMusic.volume = targetVolume;
-                clearInterval(fadeInInterval);
-            }
-        }, 100);
-    }
-});
-
-/* 🎁 mở phong bao */
-document.getElementById("envelope").addEventListener("click", () => {
-    envelopeContainer.classList.add("hidden");
-    messageContainer.classList.remove("hidden");
-
-    // pop chỉ phát 1 lần và ngay lập tức
-    if (!popPlayed) {
-        popSound.volume = 0.8;
-        popSound.play();
-        popPlayed = true;
-    }
-
-    // giảm nhạc nền nhẹ khi pháo hoa xuất hiện
-    let targetVolume = 0.15;
-    let fadeInterval = setInterval(() => {
-        if (backgroundMusic.volume > targetVolume) {
-            backgroundMusic.volume -= 0.01;
-        } else {
-            clearInterval(fadeInterval);
-        }
-    }, 100);
-
-    launchFireworks();
-});
-
-/* 🌸 hoa mai rơi */
-function createMaiRain() {
-    setInterval(() => {
-        const flower = document.createElement("img");
-        flower.src = "images/mai.png";
-        flower.classList.add("mayflower");
-
-        flower.style.left = Math.random() * 100 + "vw";
-        flower.style.animationDuration = 4 + Math.random() * 4 + "s";
-
-        document.body.appendChild(flower);
-
-        setTimeout(() => flower.remove(), 8000);
-    }, 250);
-}
-
-/* 🎆 Pháo hoa (canvas) */
-const canvas = document.getElementById("fireworks-canvas");
-const ctx = canvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+const fireworksCanvas = document.getElementById("fireworks-canvas");
+const ctx = fireworksCanvas.getContext("2d");
 
 let fireworks = [];
+let pendingFireworks = [];
+let hasOpened = false;
+let typingIndex = 0;
+let typingTimer = null;
 
-function launchFireworks() {
-    setInterval(() => {
-        fireworks.push({
-            x: Math.random() * canvas.width,
-            y: canvas.height,
-            targetY: Math.random() * canvas.height * 0.4,
-            size: 2,
-            exploded: false,
-            particles: []
-        });
+const MESSAGE_TEXT = 
+`Chúc anh yêu một năm mới bình an, may mắn và lúc nào cũng ấm áp nha ❤️  
 
-        const fwSound = document.getElementById("fireworksSound");
-        fwSound.volume = 0.5;
-        fwSound.currentTime = 0;
-        fwSound.play();
-    }, 700);
+Anh ở nơi xa, còn em gom cả mùa Tết quê mình để gửi sang cho anh từng chút một:
 
-    animateFireworks();
+🥮 Một khoanh bánh tét ngũ sắc thật dẻo,
+🍖 Một miếng thịt kho hột vịt thơm đúng vị nhà,
+✨ Và một phong bao lì xì chứa đầy điều may mắn dành riêng cho anh.
+
+Chúc anh luôn khỏe mạnh, vui vẻ và sớm về lại bên em nhen ❤️`;
+
+// ---------------------------
+// WRITE TEXT LETTER BY LETTER
+// ---------------------------
+function typeText() {
+    if (typingIndex === 0) {
+        greeting.classList.add("typing-cursor");
+        greeting.textContent = "";
+    }
+
+    if (typingIndex < MESSAGE_TEXT.length) {
+        greeting.textContent += MESSAGE_TEXT[typingIndex];
+        typingIndex++;
+        typingTimer = setTimeout(typeText, 35);
+    } else {
+        greeting.classList.remove("typing-cursor");
+    }
 }
 
-function animateFireworks() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+// ---------------------------
+// ENVELOPE CLICK → SHOW MESSAGE
+// ---------------------------
+envelope.addEventListener("click", () => {
+    if (hasOpened) return;
+    hasOpened = true;
 
-    fireworks.forEach((fw, i) => {
-        if (!fw.exploded) {
-            fw.y -= 5;
-            drawDot(fw.x, fw.y, "white");
+    envelope.style.display = "none";
+    messageBox.classList.remove("hidden");
 
-            if (fw.y <= fw.targetY) {
-                fw.exploded = true;
+    typeText();
+});
 
-                for (let p = 0; p < 25; p++) { // giảm particle để nhẹ hơn
-                    fw.particles.push({
-                        x: fw.x,
-                        y: fw.y,
-                        angle: Math.random() * Math.PI * 2,
-                        speed: 2 + Math.random() * 3,
-                        life: 40 + Math.random() * 20
-                    });
-                }
-            }
-        } else {
-            fw.particles.forEach((pt) => {
-                pt.x += Math.cos(pt.angle) * pt.speed;
-                pt.y += Math.sin(pt.angle) * pt.speed;
-                pt.life--;
+// ---------------------------
+// FIREWORKS SYSTEM
+// ---------------------------
+function resizeCanvas() {
+    fireworksCanvas.width = window.innerWidth;
+    fireworksCanvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
-                drawDot(pt.x, pt.y, randomColor());
-            });
-            fw.particles = fw.particles.filter(p => p.life > 0);
-        }
+// Add firework object
+function spawnFirework(isBurst = false) {
+    pendingFireworks.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        radius: isBurst ? 2 + Math.random() * 3 : 2,
+        life: 40 + Math.random() * 40,
+        speedX: (Math.random() - 0.5) * 4,
+        speedY: (Math.random() - 0.5) * 4
+    });
+}
 
-        if (fw.exploded && fw.particles.length === 0) {
-            fireworks.splice(i, 1);
-        }
+// Main loop
+function loop() {
+    ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+
+    fireworks.push(...pendingFireworks);
+    pendingFireworks = [];
+
+    fireworks.forEach((fw, index) => {
+        ctx.beginPath();
+        ctx.arc(fw.x, fw.y, fw.radius, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,150,0.8)";
+        ctx.fill();
+
+        fw.x += fw.speedX;
+        fw.y += fw.speedY;
+        fw.life--;
+
+        if (fw.life <= 0) fireworks.splice(index, 1);
     });
 
-    requestAnimationFrame(animateFireworks);
+    requestAnimationFrame(loop);
 }
+loop();
 
-function drawDot(x, y, color) {
-    ctx.beginPath();
-    ctx.arc(x, y, 3, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-}
+// ---------------------------
+// PAGE VISIBILITY = FIREWORK BURST MODE
+// ---------------------------
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+        // User leaves → queue MANY fireworks
+        for (let i = 0; i < 200; i++) spawnFirework(true);
+    } else {
+        // User returns → IMMEDIATE BURST
+        pendingFireworks.push(...pendingFireworks);
+    }
+});
 
-function randomColor() {
-    const colors = ["#ff4d4d", "#ffd700", "#ff66cc", "#00ccff", "#ffffff"];
-    return colors[Math.floor(Math.random() * colors.length)];
-}
+// ---------------------------
+// Background random fireworks every 1.5s
+// ---------------------------
+setInterval(() => {
+    spawnFirework();
+}, 1500);

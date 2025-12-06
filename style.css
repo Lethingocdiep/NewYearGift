@@ -3,9 +3,10 @@ body {
     background: #8b0000;
     overflow: hidden;
     font-family: "Segoe UI", sans-serif;
+    color: white;
 }
 
-/* Trái tim */
+/* Heart */
 #heart-container {
     position: absolute;
     top: 50%;
@@ -19,20 +20,12 @@ body {
 }
 
 @keyframes heartbeat {
-    0% {
-        transform: scale(1);
-    }
-
-    25% {
-        transform: scale(1.15);
-    }
-
-    50% {
-        transform: scale(1);
-    }
+    0% { transform: scale(1); }
+    25% { transform: scale(1.15); }
+    50% { transform: scale(1); }
 }
 
-/* Phong bao */
+/* Envelope */
 #envelope-container {
     position: absolute;
     top: 50%;
@@ -45,7 +38,7 @@ body {
     cursor: pointer;
 }
 
-/* Lời chúc + ảnh */
+/* Message */
 #message-container {
     position: absolute;
     top: 55%;
@@ -54,21 +47,52 @@ body {
     text-align: center;
     width: 90%;
     max-width: 400px;
+    color: white;
+    text-shadow: 0 0 6px rgba(255,255,255,0.4);
 }
 
+/* Handwriting effect – REAL typing */
+#greeting {
+    white-space: pre-line;
+    font-size: 17px;
+    font-family: "Segoe Script", "Brush Script MT", cursive;
+    overflow: hidden;
+    margin: auto;
+}
+
+/* Cursor */
+.typing-cursor {
+    border-right: 2px solid rgba(255,255,255,0.6);
+    animation: blinkCursor .6s step-end infinite;
+}
+@keyframes blinkCursor {
+    50% { border-color: transparent; }
+}
+
+/* Couple image */
 #couple-img {
     width: 100%;
     border-radius: 16px;
-    box-shadow: 0 0 15px rgba(255, 200, 200, 0.5);
     margin-top: 10px;
+    border: 2px solid gold;
+    box-shadow:
+        0 0 10px rgba(255, 215, 0, 0.6),
+        0 0 20px rgba(255, 215, 0, 0.4),
+        0 0 30px rgba(255, 215, 0, 0.2);
+    animation: goldGlow 2.5s ease-in-out infinite;
+}
+@keyframes goldGlow {
+    0% { box-shadow: 0 0 10px rgba(255,215,0,0.7); }
+    50% { box-shadow: 0 0 25px rgba(255,215,0,1); }
+    100% { box-shadow: 0 0 10px rgba(255,215,0,0.7); }
 }
 
-/* Ẩn hiện */
+/* Hidden class */
 .hidden {
     display: none;
 }
 
-/* Canvas pháo hoa */
+/* Fireworks Canvas */
 #fireworks-canvas {
     position: fixed;
     top: 0;
@@ -76,16 +100,26 @@ body {
     pointer-events: none;
 }
 
-/* Hoa mai rơi */
+/* Falling flowers */
 .mayflower {
     position: fixed;
     top: -50px;
     width: 35px;
     animation: fall linear infinite;
 }
-
 @keyframes fall {
-    to {
-        transform: translateY(120vh) rotate(360deg);
-    }
+    to { transform: translateY(120vh) rotate(360deg); }
+}
+
+/* Floating food */
+.food-floating {
+    position: fixed;
+    top: -120px;
+    width: 55px;
+    opacity: 0.9;
+    pointer-events: none;
+    animation: floatFood linear infinite;
+}
+@keyframes floatFood {
+    to { transform: translateY(120vh) rotate(180deg); }
 }
