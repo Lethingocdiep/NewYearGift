@@ -1,12 +1,12 @@
 body {
     margin: 0;
     background: #8b0000;
-    overflow-x: hidden;
+    overflow: hidden;
     font-family: "Segoe UI", sans-serif;
     color: white;
 }
 
-/* Trái tim */
+/* Heart */
 #heart-container {
     position: absolute;
     top: 50%;
@@ -18,25 +18,27 @@ body {
     width: 200px;
     animation: heartbeat 1s infinite;
 }
+
 @keyframes heartbeat {
     0% { transform: scale(1); }
     25% { transform: scale(1.15); }
     50% { transform: scale(1); }
 }
 
-/* Phong bao */
+/* Envelope */
 #envelope-container {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
+
 #envelope {
     width: 230px;
     cursor: pointer;
 }
 
-/* Message + ảnh */
+/* Message */
 #message-container {
     position: absolute;
     top: 55%;
@@ -44,17 +46,22 @@ body {
     transform: translate(-50%, -50%);
     text-align: center;
     width: 90%;
-    max-width: 420px;
+    max-width: 400px;
+    color: white;
+    text-shadow: 0 0 6px rgba(255,255,255,0.4);
 }
 
-/* Viết tay */
+/* Handwriting effect – REAL typing */
 #greeting {
     white-space: pre-line;
     font-size: 17px;
     font-family: "Segoe Script", "Brush Script MT", cursive;
     overflow: hidden;
     margin: auto;
-    line-height: 1.5;
+}
+
+/* Cursor */
+.typing-cursor {
     border-right: 2px solid rgba(255,255,255,0.6);
     animation: blinkCursor .6s step-end infinite;
 }
@@ -62,11 +69,11 @@ body {
     50% { border-color: transparent; }
 }
 
-/* Ảnh đôi */
+/* Couple image */
 #couple-img {
     width: 100%;
     border-radius: 16px;
-    margin-top: 12px;
+    margin-top: 10px;
     border: 2px solid gold;
     box-shadow:
         0 0 10px rgba(255, 215, 0, 0.6),
@@ -80,12 +87,12 @@ body {
     100% { box-shadow: 0 0 10px rgba(255,215,0,0.7); }
 }
 
-/* Hidden */
+/* Hidden class */
 .hidden {
     display: none;
 }
 
-/* Fireworks */
+/* Fireworks Canvas */
 #fireworks-canvas {
     position: fixed;
     top: 0;
@@ -93,7 +100,7 @@ body {
     pointer-events: none;
 }
 
-/* Mai rơi */
+/* Falling flowers */
 .mayflower {
     position: fixed;
     top: -50px;
@@ -104,7 +111,7 @@ body {
     to { transform: translateY(120vh) rotate(360deg); }
 }
 
-/* Food */
+/* Floating food */
 .food-floating {
     position: fixed;
     top: -120px;
