@@ -87,10 +87,13 @@ canvas.height = window.innerHeight;
 
 let fireworks = [];
 
-// ⭐ NEW: text firework state
+/* ============================
+   ⭐ TEXT FIREWORK STATE
+============================ */
 let textParticles = [];
 let textPoints = [];
 let textPhase = "idle"; // idle | rain | gather | hold
+let textHoldStarted = false;
 
 // -------------------- Pháo hoa thường --------------------
 function launchFireworks() {
@@ -115,7 +118,7 @@ function launchFireworks() {
 function animateFireworks() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // ⭐ NEW: vẽ chữ pháo hoa
+    /* ========= TEXT FIREWORK ========= */
     if (textPhase !== "idle") {
         textParticles.forEach((p, i) => {
             if (textPhase === "rain") {
@@ -125,28 +128,26 @@ function animateFireworks() {
             if (textPhase === "gather" && p.target) {
                 p.x += (p.target.x - p.x) * 0.08;
                 p.y += (p.target.y - p.y) * 0.08;
-                p.life--;
             }
 
             drawDot(p.x, p.y, p.color);
-
-            if (p.life <= 0) {
-                explodeMini(p.x, p.y);
-                textParticles.splice(i, 1);
-            }
         });
 
-       if (textPhase === "gather" && textParticles.length < 20) {
-    textPhase = "hold";
+        // giữ chữ đủ lâu để đọc
+        if (textPhase === "gather" && !textHoldStarted) {
+            textHoldStarted = true;
+            textPhase = "hold";
 
-    // ⏸️ giữ chữ đứng yên để đọc
-    setTimeout(() => {
-        textPhase = "idle";
-        showMessageBack(); // hiện lại lời chúc
-    }, 5000); // 👈 5 GIÂY
-}
+            setTimeout(() => {
+                textPhase = "idle";
+                textParticles = [];
+                showMessageBack();
+                textHoldStarted = false;
+            }, 5000); // ⏱ 5 GIÂY
+        }
     }
 
+    /* ========= FIREWORK BÌNH THƯỜNG ========= */
     fireworks.forEach((fw, i) => {
         if (!fw.exploded) {
             fw.y -= 5;
@@ -195,21 +196,6 @@ function randomColor() {
         [Math.floor(Math.random() * 5)];
 }
 
-// -------------------- Mini nổ chữ --------------------
-function explodeMini(x, y) {
-    for (let i = 0; i < 8; i++) {
-        fireworks.push({
-            x, y, exploded: true,
-            particles: [{
-                x, y,
-                angle: Math.random() * Math.PI * 2,
-                speed: 2,
-                life: 20
-            }]
-        });
-    }
-}
-
 // -------------------- Rơi đồ ăn --------------------
 function spawnFood() {
     const items = ["thit_kho.png", "banh_tet.png"];
@@ -222,14 +208,18 @@ function spawnFood() {
     setTimeout(() => img.remove(), 15000);
 }
 
-// ⭐ NEW: tạo chữ pháo hoa
+/* ============================
+   ⭐ TEXT FIREWORK FUNCTIONS
+============================ */
+
+// tạo điểm chữ
 function generateTextPoints(text) {
     const off = document.createElement("canvas");
     const offCtx = off.getContext("2d");
     off.width = canvas.width;
     off.height = canvas.height;
 
-    offCtx.font = "bold 72px serif";
+    offCtx.font = "bold 72px Segoe UI";
     offCtx.fillStyle = "white";
     offCtx.textAlign = "center";
     offCtx.fillText(text, off.width / 2, off.height / 2);
@@ -246,8 +236,11 @@ function generateTextPoints(text) {
     }
 }
 
+// kích hoạt chữ pháo hoa
 function startTextFirework() {
-    hideMessageTemporarily(); // ⭐ ẩn lời chúc
+    if (textPhase !== "idle") return;
+
+    hideMessageTemporarily();
 
     generateTextPoints("Ich vermisse dich");
     textParticles = [];
@@ -258,7 +251,6 @@ function startTextFirework() {
             x: Math.random() * canvas.width,
             y: -Math.random() * canvas.height,
             vy: 3 + Math.random() * 3,
-            life: 80,
             color: randomColor(),
             target: null
         });
