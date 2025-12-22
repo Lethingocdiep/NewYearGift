@@ -186,10 +186,17 @@ function animateFireworks() {
 // -------------------- Vẽ chấm --------------------
 function drawDot(x, y, color) {
     ctx.beginPath();
-    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
     ctx.fillStyle = color;
+
+    ctx.shadowBlur = 10;      // ✨ glow
+    ctx.shadowColor = color;
+
     ctx.fill();
+
+    ctx.shadowBlur = 0;       // reset để không ảnh hưởng chỗ khác
 }
+
 
 function randomColor() {
     return ["#ff4d4d", "#ffd700", "#ff66cc", "#00ccff", "#ffffff"]
