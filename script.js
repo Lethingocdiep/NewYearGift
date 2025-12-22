@@ -90,7 +90,7 @@ let fireworks = [];
 // ⭐ NEW: text firework state
 let textParticles = [];
 let textPoints = [];
-let textPhase = "idle"; // idle | rain | gather
+let textPhase = "idle"; // idle | rain | gather | hold
 
 // -------------------- Pháo hoa thường --------------------
 function launchFireworks() {
@@ -136,10 +136,15 @@ function animateFireworks() {
             }
         });
 
-        if (textPhase === "gather" && textParticles.length < 20) {
-            textPhase = "idle";
-            showMessageBack(); // ⭐ hiện lại lời chúc
-        }
+       if (textPhase === "gather" && textParticles.length < 20) {
+    textPhase = "hold";
+
+    // ⏸️ giữ chữ đứng yên để đọc
+    setTimeout(() => {
+        textPhase = "idle";
+        showMessageBack(); // hiện lại lời chúc
+    }, 5000); // 👈 5 GIÂY
+}
     }
 
     fireworks.forEach((fw, i) => {
