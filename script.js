@@ -88,12 +88,13 @@ canvas.height = window.innerHeight;
 let fireworks = [];
 
 /* ============================
-   ⭐ TEXT FIREWORK STATE
+   TEXT FIREWORK STATE
 ============================ */
 let textParticles = [];
 let textPoints = [];
 let textPhase = "idle"; // idle | rain | gather | hold
 let textHoldStarted = false;
+let gatherStartTime = 0;
 
 // -------------------- Pháo hoa thường --------------------
 function launchFireworks() {
@@ -120,7 +121,7 @@ function animateFireworks() {
 
     /* ========= TEXT FIREWORK ========= */
     if (textPhase !== "idle") {
-        textParticles.forEach((p, i) => {
+        textParticles.forEach(p => {
             if (textPhase === "rain") {
                 p.y += p.vy;
             }
@@ -133,17 +134,20 @@ function animateFireworks() {
             drawDot(p.x, p.y, p.color);
         });
 
-        // giữ chữ đủ lâu để đọc
-        if (textPhase === "gather" && !textHoldStarted) {
-            textHoldStarted = true;
-            textPhase = "hold";
+        if (textPhase === "gather") {
+            const elapsed = performance.now() - gatherStartTime;
 
-            setTimeout(() => {
-                textPhase = "idle";
-                textParticles = [];
-                showMessageBack();
-                textHoldStarted = false;
-            }, 5000); // ⏱ 5 GIÂY
+            if (elapsed > 2500 && !textHoldStarted) {
+                textHoldStarted = true;
+                textPhase = "hold";
+
+                setTimeout(() => {
+                    textPhase = "idle";
+                    textParticles = [];
+                    showMessageBack();
+                    textHoldStarted = false;
+                }, 5000); // giữ chữ 5s
+            }
         }
     }
 
@@ -186,17 +190,15 @@ function animateFireworks() {
 // -------------------- Vẽ chấm --------------------
 function drawDot(x, y, color) {
     ctx.beginPath();
-    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.arc(x, y, 4, 0, Math.PI * 2); // 👈 size 4
     ctx.fillStyle = color;
 
-    ctx.shadowBlur = 10;      // ✨ glow
+    ctx.shadowBlur = 10;       // glow
     ctx.shadowColor = color;
 
     ctx.fill();
-
-    ctx.shadowBlur = 0;       // reset để không ảnh hưởng chỗ khác
+    ctx.shadowBlur = 0;
 }
-
 
 function randomColor() {
     return ["#ff4d4d", "#ffd700", "#ff66cc", "#00ccff", "#ffffff"]
@@ -216,7 +218,7 @@ function spawnFood() {
 }
 
 /* ============================
-   ⭐ TEXT FIREWORK FUNCTIONS
+   TEXT FIREWORK FUNCTIONS
 ============================ */
 
 // tạo điểm chữ
@@ -252,8 +254,9 @@ function startTextFirework() {
     generateTextPoints("Ich vermisse dich");
     textParticles = [];
     textPhase = "rain";
+    textHoldStarted = false;
 
-    for (let i = 0; i < 220; i++) {
+    for (let i = 0; i < 240; i++) {
         textParticles.push({
             x: Math.random() * canvas.width,
             y: -Math.random() * canvas.height,
@@ -265,6 +268,7 @@ function startTextFirework() {
 
     setTimeout(() => {
         textPhase = "gather";
+        gatherStartTime = performance.now();
         textParticles.forEach((p, i) => {
             p.target = textPoints[i % textPoints.length];
         });
