@@ -1,3 +1,6 @@
+/* =====================
+   DOM
+===================== */
 const heart = document.getElementById("heart");
 const heartContainer = document.getElementById("heart-container");
 
@@ -6,17 +9,20 @@ const messageContainer = document.getElementById("message-container");
 
 const thumpSound = new Audio("audio/thump.mp3");
 const popSound = document.getElementById("popSound");
-
-let backgroundMusic = document.getElementById("backgroundMusic");
-let popPlayed = false;
+const backgroundMusic = document.getElementById("backgroundMusic");
+const fireworkSound = document.getElementById("fireworksSound");
 
 /* =====================
-   💓 NHỊP TIM
+   ÂM THANH
 ===================== */
-thumpSound.volume = 0.8; // 🔊 tăng âm lượng tim
+thumpSound.volume = 0.8;
 thumpSound.playbackRate = 0.95;
+thumpSound.loop = true;
 thumpSound.play();
 
+fireworkSound.volume = 0.6;
+
+let popPlayed = false;
 let foodIntervalStarted = false;
 
 /* =====================
@@ -38,12 +44,10 @@ heart.addEventListener("click", () => {
         backgroundMusic.loop = true;
         backgroundMusic.play();
 
-        let fadeIn = setInterval(() => {
+        const fadeIn = setInterval(() => {
             if (backgroundMusic.volume < 0.3) {
                 backgroundMusic.volume += 0.01;
-            } else {
-                clearInterval(fadeIn);
-            }
+            } else clearInterval(fadeIn);
         }, 100);
     }
 });
@@ -61,25 +65,23 @@ document.getElementById("envelope").addEventListener("click", () => {
         popPlayed = true;
     }
 
-    let fade = setInterval(() => {
+    const fade = setInterval(() => {
         if (backgroundMusic.volume > 0.15) {
             backgroundMusic.volume -= 0.01;
-        } else {
-            clearInterval(fade);
-        }
+        } else clearInterval(fade);
     }, 100);
 
     launchFireworks();
 });
 
 /* =====================
-   🌼 HOA MAI RƠI
+   HOA MAI
 ===================== */
 function createMaiRain() {
     setInterval(() => {
         const flower = document.createElement("img");
         flower.src = "images/mai.png";
-        flower.classList.add("mayflower");
+        flower.className = "mayflower";
         flower.style.left = Math.random() * 100 + "vw";
         flower.style.animationDuration = 4 + Math.random() * 4 + "s";
         document.body.appendChild(flower);
@@ -88,29 +90,33 @@ function createMaiRain() {
 }
 
 /* =====================
-   🎆 CANVAS PHÁO HOA
+   CANVAS
 ===================== */
 const canvas = document.getElementById("fireworks-canvas");
 const ctx = canvas.getContext("2d");
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+window.addEventListener("resize", () => {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+});
 
+/* =====================
+   STATE
+===================== */
 let fireworks = [];
+let pauseNormalFireworks = false;
 
-/* ===== TEXT FIREWORK STATE ===== */
 let textParticles = [];
 let textPoints = [];
-let textPhase = "idle"; 
+let textPhase = "idle";
 let textHoldStarted = false;
-let gatherStartTime = 0;
+let explodeTriggered = false;
 
 /* =====================
    PHÁO HOA THƯỜNG
 ===================== */
-const fireworkSound = document.getElementById("fireworksSound");
-fireworkSound.volume = 0.6;
-
 function launchFireworks() {
     setInterval(() => {
         fireworks.push({
@@ -122,43 +128,38 @@ function launchFireworks() {
         });
     }, 700);
 
-    animateFireworks();
+    animate();
 }
 
-function animateFireworks() {
+/* =====================
+   ANIMATE LOOP
+===================== */
+function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    /* ===== TEXT FIREWORK ===== */
+    /* TEXT FIREWORK */
     if (textPhase !== "idle") {
         textParticles.forEach(p => {
-            if (textPhase === "rain") {
-                p.y += p.vy;
-            }
-
+            if (textPhase === "rain") p.y += p.vy;
             if (textPhase === "gather" || textPhase === "hold") {
                 p.x += (p.target.x - p.x) * 0.08;
                 p.y += (p.target.y - p.y) * 0.08;
             }
-
             if (textPhase === "explode") {
                 p.x += p.vx;
                 p.y += p.vy;
                 p.life--;
             }
-
             drawDot(p.x, p.y, p.color);
         });
 
-        /* GIỮ CHỮ */
-        if (textPhase === "gather") {
-            if (!textHoldStarted) {
-                textHoldStarted = true;
-                setTimeout(() => textPhase = "hold", 800);
-            }
+        if (textPhase === "gather" && !textHoldStarted) {
+            textHoldStarted = true;
+            setTimeout(() => textPhase = "hold", 800);
         }
 
-        /* TAN CHỮ */
-        if (textPhase === "hold") {
+        if (textPhase === "hold" && !explodeTriggered) {
+            explodeTriggered = true;
             setTimeout(() => {
                 textPhase = "explode";
                 textParticles.forEach(p => {
@@ -166,66 +167,67 @@ function animateFireworks() {
                     p.vy = Math.sin(Math.random() * Math.PI * 2) * 4;
                     p.life = 40;
                 });
-            }, 3500);
+            }, 3000);
         }
 
-        /* KẾT THÚC */
         if (textPhase === "explode") {
             textParticles = textParticles.filter(p => p.life > 0);
             if (textParticles.length === 0) {
                 textPhase = "idle";
+                explodeTriggered = false;
+                pauseNormalFireworks = false;
                 showMessageBack();
             }
         }
     }
 
-    /* ===== PHÁO HOA BÌNH THƯỜNG ===== */
-    fireworks.forEach((fw, i) => {
-        if (!fw.exploded) {
-            fw.y -= 5;
-            drawDot(fw.x, fw.y, "white");
+    /* PHÁO HOA BÌNH THƯỜNG */
+    if (!pauseNormalFireworks) {
+        fireworks.forEach((fw, i) => {
+            if (!fw.exploded) {
+                fw.y -= 5;
+                drawDot(fw.x, fw.y, "white");
 
-            if (fw.y <= fw.targetY) {
-                fw.exploded = true;
-                fireworkSound.currentTime = 0;
-                fireworkSound.play();
+                if (fw.y <= fw.targetY) {
+                    fw.exploded = true;
+                    fireworkSound.currentTime = 0;
+                    fireworkSound.play();
 
-                for (let p = 0; p < 25; p++) {
-                    fw.particles.push({
-                        x: fw.x,
-                        y: fw.y,
-                        angle: Math.random() * Math.PI * 2,
-                        speed: 2 + Math.random() * 3,
-                        life: 40
-                    });
+                    for (let p = 0; p < 25; p++) {
+                        fw.particles.push({
+                            x: fw.x,
+                            y: fw.y,
+                            angle: Math.random() * Math.PI * 2,
+                            speed: 2 + Math.random() * 3,
+                            life: 40
+                        });
+                    }
                 }
+            } else {
+                fw.particles.forEach(pt => {
+                    pt.x += Math.cos(pt.angle) * pt.speed;
+                    pt.y += Math.sin(pt.angle) * pt.speed;
+                    pt.life--;
+                    drawDot(pt.x, pt.y, randomColor());
+                });
+                fw.particles = fw.particles.filter(p => p.life > 0);
             }
-        } else {
-            fw.particles.forEach(pt => {
-                pt.x += Math.cos(pt.angle) * pt.speed;
-                pt.y += Math.sin(pt.angle) * pt.speed;
-                pt.life--;
-                drawDot(pt.x, pt.y, randomColor());
-            });
-            fw.particles = fw.particles.filter(p => p.life > 0);
-        }
 
-        if (fw.exploded && fw.particles.length === 0) {
-            fireworks.splice(i, 1);
-        }
-    });
+            if (fw.exploded && fw.particles.length === 0) fireworks.splice(i, 1);
+        });
+    }
 
-    requestAnimationFrame(animateFireworks);
+    requestAnimationFrame(animate);
 }
 
 /* =====================
-   VẼ HẠT
+   DOT
 ===================== */
 function drawDot(x, y, color) {
     ctx.beginPath();
     ctx.arc(x, y, 4, 0, Math.PI * 2);
     ctx.fillStyle = color;
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = 14;
     ctx.shadowColor = color;
     ctx.fill();
     ctx.shadowBlur = 0;
@@ -237,7 +239,7 @@ function randomColor() {
 }
 
 /* =====================
-   RƠI ĐỒ ĂN
+   ĐỒ ĂN
 ===================== */
 function spawnFood() {
     const items = ["thit_kho.png", "banh_tet.png"];
@@ -259,9 +261,10 @@ function generateTextPoints(text) {
     off.width = canvas.width;
     off.height = canvas.height;
 
-    offCtx.font = "bold 96px Segoe UI";
+    offCtx.font = "bold 88px Segoe UI";
     offCtx.textAlign = "center";
     offCtx.textBaseline = "middle";
+    offCtx.fillStyle = "white";
     offCtx.fillText(text, off.width / 2, off.height * 0.45);
 
     const data = offCtx.getImageData(0, 0, off.width, off.height).data;
@@ -279,30 +282,30 @@ function generateTextPoints(text) {
 function startTextFirework() {
     if (textPhase !== "idle") return;
 
+    pauseNormalFireworks = true;
     hideMessageTemporarily();
+
     generateTextPoints("Ich vermisse dich");
 
     textParticles = [];
     textPhase = "rain";
     textHoldStarted = false;
 
-    for (let i = 0; i < 600; i++) {
+    for (let i = 0; i < 700; i++) {
         textParticles.push({
             x: Math.random() * canvas.width,
             y: -Math.random() * canvas.height,
-            vy: 3 + Math.random() * 3,
+            vy: 6 + Math.random() * 4,
             color: randomColor(),
             target: textPoints[i % textPoints.length]
         });
     }
 
-    setTimeout(() => {
-        textPhase = "gather";
-    }, 1500);
+    setTimeout(() => textPhase = "gather", 1500);
 }
 
 /* =====================
-   ẨN / HIỆN LỜI CHÚC
+   MESSAGE
 ===================== */
 function hideMessageTemporarily() {
     messageContainer.classList.add("hidden-soft");
