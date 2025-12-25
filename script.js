@@ -192,28 +192,36 @@ function animate() {
 ===================== */
 function generateTextPoints(text) {
     const off = document.createElement("canvas");
-    off.width = canvas.width;
-    off.height = canvas.height;
+
+    /* 🔧 FIX: canvas chữ nhỏ hơn màn hình */
+    off.width = canvas.width * 0.8;
+    off.height = 200;
+
     const c = off.getContext("2d");
 
-    /* 🔧 FIX 1: FONT ĐẬM & DỄ NHÌN HƠN */
-    c.font = "900 120px 'Segoe UI', 'Arial Black', sans-serif";
+    /* 🔧 FIX: font gọn – dễ đọc chữ dài */
+    c.font = "900 110px 'Segoe UI', Arial, sans-serif";
     c.textAlign = "center";
     c.textBaseline = "middle";
-    c.fillText(text, off.width / 2, off.height * 0.45);
+    c.fillStyle = "#ffffff"; // trắng để lấy biên rõ
+    c.fillText(text, off.width / 2, off.height / 2);
 
-    const d = c.getImageData(0,0,off.width,off.height).data;
+    const d = c.getImageData(0, 0, off.width, off.height).data;
     textPoints = [];
 
-    /* 🔧 FIX 2: LẤY ĐIỂM DÀY HƠN (2px thay vì 4px) */
-    for (let y = 0; y < off.height; y += 2) {
-        for (let x = 0; x < off.width; x += 2) {
+    /* 🔧 FIX: sample vừa phải */
+    for (let y = 0; y < off.height; y += 3) {
+        for (let x = 0; x < off.width; x += 3) {
             if (d[(y * off.width + x) * 4 + 3] > 150) {
-                textPoints.push({ x, y });
+                textPoints.push({
+                    x: x + (canvas.width - off.width) / 2,
+                    y: y + canvas.height * 0.4
+                });
             }
         }
     }
 }
+
 
 function startTextFirework() {
     if (textPhase !== "idle") return;
@@ -234,7 +242,7 @@ function startTextFirework() {
             target: textPoints[i % textPoints.length],
             vx: 0,
             life: 60,
-            color: randomColor()
+            color: Math.random() < 0.7 ? "#ffffff" : "#ff66cc"
         });
     }
 
@@ -310,17 +318,12 @@ function drawDot(x, y, color) {
     ctx.arc(x, y, 4, 0, Math.PI * 2);
     ctx.fillStyle = color;
 
-    /* 🔧 FIX 4: GIẢM GLOW → CHỮ SẮC NÉT HƠN */
-    ctx.shadowBlur = 6;
+    /* 🔧 FIX: glow nhẹ để chữ không bệt */
+    ctx.shadowBlur = 4;
     ctx.shadowColor = color;
 
     ctx.fill();
     ctx.shadowBlur = 0;
-}
-
-function randomColor() {
-    return ["#ff4d4d", "#ffd700", "#ff66cc", "#ffffff"]
-        [Math.floor(Math.random() * 4)];
 }
 
 /* =====================
