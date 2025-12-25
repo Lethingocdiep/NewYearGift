@@ -114,18 +114,23 @@ let textPhase = "idle";
 let textHoldStarted = false;
 let explodeTriggered = false;
 
+// MỚI: trạng thái tab
+let tabHidden = false;
+
 /* =====================
    PHÁO HOA THƯỜNG
 ===================== */
 function launchFireworks() {
     setInterval(() => {
-        fireworks.push({
-            x: Math.random() * canvas.width,
-            y: canvas.height,
-            targetY: Math.random() * canvas.height * 0.4,
-            exploded: false,
-            particles: []
-        });
+        if (!tabHidden) { // CHỈ BẮN KHI TAB HIỂN THỊ
+            fireworks.push({
+                x: Math.random() * canvas.width,
+                y: canvas.height,
+                targetY: Math.random() * canvas.height * 0.4,
+                exploded: false,
+                particles: []
+            });
+        }
     }, 700);
 
     animate();
@@ -190,8 +195,12 @@ function animate() {
 
                 if (fw.y <= fw.targetY) {
                     fw.exploded = true;
-                    fireworkSound.currentTime = 0;
-                    fireworkSound.play();
+                    
+                    // CHỈ PHÁT ÂM KHI TAB HIỂN THỊ
+                    if (!tabHidden) {
+                        fireworkSound.currentTime = 0;
+                        fireworkSound.play();
+                    }
 
                     for (let p = 0; p < 25; p++) {
                         fw.particles.push({
@@ -318,7 +327,15 @@ function showMessageBack() {
    QUAY LẠI TAB
 ===================== */
 document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && !messageContainer.classList.contains("hidden")) {
-        startTextFirework();
+    if (document.hidden) {
+        tabHidden = true;
+        // Khi tab ẩn: dừng âm thanh, pháo hoa "tụ" trên
+        fireworkSound.pause();
+        fireworks.forEach(fw => fw.y = canvas.height * 0.1); // đưa lên gần đỉnh
+    } else {
+        tabHidden = false;
+        if (!messageContainer.classList.contains("hidden")) {
+            startTextFirework();
+        }
     }
 });
