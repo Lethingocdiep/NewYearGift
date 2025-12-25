@@ -232,11 +232,12 @@ function animate() {
 /* =====================
    DOT
 ===================== */
+/* drawDot update: tăng radius 1 chút để nhìn rõ chữ hơn */
 function drawDot(x, y, color) {
     ctx.beginPath();
-    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.arc(x, y, 5, 0, Math.PI * 2); // radius 5 thay vì 4
     ctx.fillStyle = color;
-    ctx.shadowBlur = 14;
+    ctx.shadowBlur = 16; // tăng blur nhẹ để hiệu ứng nổi bật
     ctx.shadowColor = color;
     ctx.fill();
     ctx.shadowBlur = 0;
@@ -270,7 +271,8 @@ function generateTextPoints(text) {
     off.width = canvas.width;
     off.height = canvas.height;
 
-    offCtx.font = "bold 88px Segoe UI";
+    // Tăng size font để rõ hơn
+    offCtx.font = "bold 120px Segoe UI"; 
     offCtx.textAlign = "center";
     offCtx.textBaseline = "middle";
     offCtx.fillStyle = "white";
@@ -279,14 +281,16 @@ function generateTextPoints(text) {
     const data = offCtx.getImageData(0, 0, off.width, off.height).data;
     textPoints = [];
 
-    for (let y = 0; y < off.height; y += 4) {
-        for (let x = 0; x < off.width; x += 4) {
+    // Quét canvas với khoảng cách nhỏ hơn (2px) để chữ rõ hơn
+    for (let y = 0; y < off.height; y += 2) {
+        for (let x = 0; x < off.width; x += 2) {
             if (data[(y * off.width + x) * 4 + 3] > 150) {
                 textPoints.push({ x, y });
             }
         }
     }
 }
+
 
 function startTextFirework() {
     if (textPhase !== "idle") return;
