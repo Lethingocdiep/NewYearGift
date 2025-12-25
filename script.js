@@ -1,9 +1,5 @@
-/* =====================
-   DOM
-===================== */
 const heart = document.getElementById("heart");
 const heartContainer = document.getElementById("heart-container");
-
 const envelopeContainer = document.getElementById("envelope-container");
 const messageContainer = document.getElementById("message-container");
 
@@ -17,13 +13,13 @@ const fireworkSound = document.getElementById("fireworksSound");
 ===================== */
 thumpSound.volume = 0.8;
 thumpSound.playbackRate = 0.95;
-thumpSound.loop = true;
 thumpSound.play();
 
 fireworkSound.volume = 0.6;
 
 let popPlayed = false;
-let foodIntervalStarted = false;
+let foodStarted = false;
+let tabActive = true;
 
 /* =====================
    CLICK TRÁI TIM
@@ -31,25 +27,22 @@ let foodIntervalStarted = false;
 heart.addEventListener("click", () => {
     heartContainer.classList.add("hidden");
     envelopeContainer.classList.remove("hidden");
-
     createMaiRain();
 
-    if (!foodIntervalStarted) {
-        foodIntervalStarted = true;
+    if (!foodStarted) {
+        foodStarted = true;
         setInterval(spawnFood, 4000);
     }
 
-    if (backgroundMusic.paused) {
-        backgroundMusic.volume = 0;
-        backgroundMusic.loop = true;
-        backgroundMusic.play();
+    backgroundMusic.volume = 0;
+    backgroundMusic.loop = true;
+    backgroundMusic.play();
 
-        const fadeIn = setInterval(() => {
-            if (backgroundMusic.volume < 0.3) {
-                backgroundMusic.volume += 0.01;
-            } else clearInterval(fadeIn);
-        }, 100);
-    }
+    let fade = setInterval(() => {
+        if (backgroundMusic.volume < 0.3) {
+            backgroundMusic.volume += 0.01;
+        } else clearInterval(fade);
+    }, 100);
 });
 
 /* =====================
@@ -65,12 +58,6 @@ document.getElementById("envelope").addEventListener("click", () => {
         popPlayed = true;
     }
 
-    const fade = setInterval(() => {
-        if (backgroundMusic.volume > 0.15) {
-            backgroundMusic.volume -= 0.01;
-        } else clearInterval(fade);
-    }, 100);
-
     launchFireworks();
 });
 
@@ -79,14 +66,14 @@ document.getElementById("envelope").addEventListener("click", () => {
 ===================== */
 function createMaiRain() {
     setInterval(() => {
-        const flower = document.createElement("img");
-        flower.src = "images/mai.png";
-        flower.className = "mayflower";
-        flower.style.left = Math.random() * 100 + "vw";
-        flower.style.animationDuration = 4 + Math.random() * 4 + "s";
-        document.body.appendChild(flower);
-        setTimeout(() => flower.remove(), 8000);
-    }, 250);
+        const f = document.createElement("img");
+        f.src = "images/mai.png";
+        f.className = "mayflower";
+        f.style.left = Math.random() * 100 + "vw";
+        f.style.animationDuration = 4 + Math.random() * 4 + "s";
+        document.body.appendChild(f);
+        setTimeout(() => f.remove(), 8000);
+    }, 260);
 }
 
 /* =====================
@@ -94,172 +81,78 @@ function createMaiRain() {
 ===================== */
 const canvas = document.getElementById("fireworks-canvas");
 const ctx = canvas.getContext("2d");
+
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-window.addEventListener("resize", () => {
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
-});
-
-/* =====================
-   STATE
-===================== */
 let fireworks = [];
-let pauseNormalFireworks = false;
-
 let textParticles = [];
 let textPoints = [];
 let textPhase = "idle";
-let textHoldStarted = false;
-let explodeTriggered = false;
-
-// MỚI: trạng thái tab
-let tabHidden = false;
+let heartBursted = false;
 
 /* =====================
-   PHÁO HOA THƯỜNG
+   PHÁO HOA
 ===================== */
 function launchFireworks() {
     setInterval(() => {
-        if (!tabHidden) { // CHỈ BẮN KHI TAB HIỂN THỊ
-            fireworks.push({
-                x: Math.random() * canvas.width,
-                y: canvas.height,
-                targetY: Math.random() * canvas.height * 0.4,
-                exploded: false,
-                particles: []
-            });
-        }
+        if (!tabActive || textPhase !== "idle") return;
+
+        fireworks.push({
+            x: Math.random() * canvas.width,
+            y: canvas.height,
+            targetY: Math.random() * canvas.height * 0.4,
+            exploded: false,
+            particles: []
+        });
     }, 700);
 
     animate();
 }
 
-/* =====================
-   ANIMATE LOOP
-===================== */
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     /* TEXT FIREWORK */
-    if (textPhase !== "idle") {
-        textParticles.forEach(p => {
-            if (textPhase === "rain") p.y += p.vy;
-            if (textPhase === "gather" || textPhase === "hold") {
-                p.x += (p.target.x - p.x) * 0.08;
-                p.y += (p.target.y - p.y) * 0.08;
-            }
-            if (textPhase === "explode") {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.life--;
-            }
-            drawDot(p.x, p.y, p.color);
-        });
+    if (textPhase !== "idle") handleTextFirework();
 
-        if (textPhase === "gather" && !textHoldStarted) {
-            textHoldStarted = true;
-            setTimeout(() => textPhase = "hold", 800);
-        }
+    /* PHÁO HOA THƯỜNG */
+    fireworks.forEach((fw, i) => {
+        if (!fw.exploded) {
+            fw.y -= 5;
+            drawDot(fw.x, fw.y, "#fff");
 
-        if (textPhase === "hold" && !explodeTriggered) {
-            explodeTriggered = true;
-            setTimeout(() => {
-                textPhase = "explode";
-                textParticles.forEach(p => {
-                    p.vx = Math.cos(Math.random() * Math.PI * 2) * 4;
-                    p.vy = Math.sin(Math.random() * Math.PI * 2) * 4;
-                    p.life = 40;
-                });
-            }, 3000);
-        }
-
-        if (textPhase === "explode") {
-            textParticles = textParticles.filter(p => p.life > 0);
-            if (textParticles.length === 0) {
-                textPhase = "idle";
-                explodeTriggered = false;
-                pauseNormalFireworks = false;
-                showMessageBack();
-            }
-        }
-    }
-
-    /* PHÁO HOA BÌNH THƯỜNG */
-    if (!pauseNormalFireworks) {
-        fireworks.forEach((fw, i) => {
-            if (!fw.exploded) {
-                fw.y -= 5;
-                drawDot(fw.x, fw.y, "white");
-
-                if (fw.y <= fw.targetY) {
-                    fw.exploded = true;
-                    
-                    // CHỈ PHÁT ÂM KHI TAB HIỂN THỊ
-                    if (!tabHidden) {
-                        fireworkSound.currentTime = 0;
-                        fireworkSound.play();
-                    }
-
-                    for (let p = 0; p < 25; p++) {
-                        fw.particles.push({
-                            x: fw.x,
-                            y: fw.y,
-                            angle: Math.random() * Math.PI * 2,
-                            speed: 2 + Math.random() * 3,
-                            life: 40
-                        });
-                    }
+            if (fw.y <= fw.targetY) {
+                fw.exploded = true;
+                if (tabActive) {
+                    fireworkSound.currentTime = 0;
+                    fireworkSound.play();
                 }
-            } else {
-                fw.particles.forEach(pt => {
-                    pt.x += Math.cos(pt.angle) * pt.speed;
-                    pt.y += Math.sin(pt.angle) * pt.speed;
-                    pt.life--;
-                    drawDot(pt.x, pt.y, randomColor());
-                });
-                fw.particles = fw.particles.filter(p => p.life > 0);
-            }
 
-            if (fw.exploded && fw.particles.length === 0) fireworks.splice(i, 1);
-        });
-    }
+                for (let p = 0; p < 30; p++) {
+                    fw.particles.push({
+                        x: fw.x,
+                        y: fw.y,
+                        a: Math.random() * Math.PI * 2,
+                        s: 2 + Math.random() * 3,
+                        l: 40
+                    });
+                }
+            }
+        } else {
+            fw.particles.forEach(pt => {
+                pt.x += Math.cos(pt.a) * pt.s;
+                pt.y += Math.sin(pt.a) * pt.s;
+                pt.l--;
+                drawDot(pt.x, pt.y, randomColor());
+            });
+            fw.particles = fw.particles.filter(p => p.l > 0);
+        }
+
+        if (fw.exploded && fw.particles.length === 0) fireworks.splice(i, 1);
+    });
 
     requestAnimationFrame(animate);
-}
-
-/* =====================
-   DOT
-===================== */
-/* drawDot update: tăng radius 1 chút để nhìn rõ chữ hơn */
-function drawDot(x, y, color) {
-    ctx.beginPath();
-    ctx.arc(x, y, 5, 0, Math.PI * 2); // radius 5 thay vì 4
-    ctx.fillStyle = color;
-    ctx.shadowBlur = 16; // tăng blur nhẹ để hiệu ứng nổi bật
-    ctx.shadowColor = color;
-    ctx.fill();
-    ctx.shadowBlur = 0;
-}
-
-function randomColor() {
-    return ["#ff4d4d", "#ffd700", "#ff66cc", "#00ccff", "#ffffff"]
-        [Math.floor(Math.random() * 5)];
-}
-
-/* =====================
-   ĐỒ ĂN
-===================== */
-function spawnFood() {
-    const items = ["thit_kho.png", "banh_tet.png"];
-    const img = document.createElement("img");
-    img.src = "images/" + items[Math.floor(Math.random() * items.length)];
-    img.className = "food-floating";
-    img.style.left = Math.random() * 100 + "vw";
-    img.style.animationDuration = 8 + Math.random() * 5 + "s";
-    document.body.appendChild(img);
-    setTimeout(() => img.remove(), 15000);
 }
 
 /* =====================
@@ -267,79 +160,148 @@ function spawnFood() {
 ===================== */
 function generateTextPoints(text) {
     const off = document.createElement("canvas");
-    const offCtx = off.getContext("2d");
     off.width = canvas.width;
     off.height = canvas.height;
+    const c = off.getContext("2d");
 
-    // Tăng size font để rõ hơn
-    offCtx.font = "bold 120px Segoe UI"; 
-    offCtx.textAlign = "center";
-    offCtx.textBaseline = "middle";
-    offCtx.fillStyle = "white";
-    offCtx.fillText(text, off.width / 2, off.height * 0.45);
+    c.font = "bold 110px Segoe UI";
+    c.textAlign = "center";
+    c.textBaseline = "middle";
+    c.fillText(text, off.width / 2, off.height * 0.45);
 
-    const data = offCtx.getImageData(0, 0, off.width, off.height).data;
+    const d = c.getImageData(0,0,off.width,off.height).data;
     textPoints = [];
 
-    // Quét canvas với khoảng cách nhỏ hơn (2px) để chữ rõ hơn
-    for (let y = 0; y < off.height; y += 2) {
-        for (let x = 0; x < off.width; x += 2) {
-            if (data[(y * off.width + x) * 4 + 3] > 150) {
-                textPoints.push({ x, y });
-            }
+    for (let y=0;y<off.height;y+=4){
+        for (let x=0;x<off.width;x+=4){
+            if (d[(y*off.width+x)*4+3]>150) textPoints.push({x,y});
         }
     }
 }
-
 
 function startTextFirework() {
     if (textPhase !== "idle") return;
 
-    pauseNormalFireworks = true;
-    hideMessageTemporarily();
-
+    messageContainer.classList.add("hidden-soft");
     generateTextPoints("Ich vermisse dich");
 
     textParticles = [];
+    heartBursted = false;
     textPhase = "rain";
-    textHoldStarted = false;
 
-    for (let i = 0; i < 700; i++) {
+    for (let i=0;i<700;i++){
         textParticles.push({
-            x: Math.random() * canvas.width,
-            y: -Math.random() * canvas.height,
-            vy: 6 + Math.random() * 4,
-            color: randomColor(),
-            target: textPoints[i % textPoints.length]
+            x: Math.random()*canvas.width,
+            y: -Math.random()*canvas.height,
+            vy: 3+Math.random()*3,
+            target: textPoints[i % textPoints.length],
+            vx: 0,
+            life: 60,
+            color: randomColor()
         });
     }
 
-    setTimeout(() => textPhase = "gather", 1500);
+    setTimeout(()=> textPhase="gather",1500);
 }
 
-/* =====================
-   MESSAGE
-===================== */
-function hideMessageTemporarily() {
-    messageContainer.classList.add("hidden-soft");
-}
-function showMessageBack() {
-    messageContainer.classList.remove("hidden-soft");
-}
-
-/* =====================
-   QUAY LẠI TAB
-===================== */
-document.addEventListener("visibilitychange", () => {
-    if (document.hidden) {
-        tabHidden = true;
-        // Khi tab ẩn: dừng âm thanh, pháo hoa "tụ" trên
-        fireworkSound.pause();
-        fireworks.forEach(fw => fw.y = canvas.height * 0.1); // đưa lên gần đỉnh
-    } else {
-        tabHidden = false;
-        if (!messageContainer.classList.contains("hidden")) {
-            startTextFirework();
+function handleTextFirework(){
+    textParticles.forEach(p=>{
+        if (textPhase==="rain") p.y+=p.vy;
+        if (textPhase==="gather"||textPhase==="hold"){
+            p.x+=(p.target.x-p.x)*0.08;
+            p.y+=(p.target.y-p.y)*0.08;
         }
+        if (textPhase==="explode"){
+            p.x+=p.vx;
+            p.y+=p.vy;
+            p.life--;
+        }
+        drawDot(p.x,p.y,p.color);
+    });
+
+    if (textPhase==="gather"&&!heartBursted){
+        heartBursted=true;
+        burstHeartFireworks();
+        setTimeout(()=>textPhase="hold",600);
+    }
+
+    if (textPhase==="hold"){
+        setTimeout(()=>{
+            textPhase="explode";
+            textParticles.forEach(p=>{
+                p.vx=Math.cos(Math.random()*Math.PI*2)*4;
+                p.vy=Math.sin(Math.random()*Math.PI*2)*4;
+            });
+        },3000);
+    }
+
+    if (textPhase==="explode"){
+        textParticles=textParticles.filter(p=>p.life>0);
+        if (!textParticles.length){
+            textPhase="idle";
+            messageContainer.classList.remove("hidden-soft");
+        }
+    }
+}
+
+/* 💗 PHÁO HOA TRÁI TIM */
+function burstHeartFireworks(){
+    const cx = canvas.width/2;
+    const cy = canvas.height*0.45;
+
+    for(let i=0;i<120;i++){
+        const t = i/120*Math.PI*2;
+        fireworks.push({
+            exploded:true,
+            particles:[{
+                x:cx,
+                y:cy,
+                a:t,
+                s:2.5,
+                l:40,
+                color: i%2?"#ff66cc":"#ffffff"
+            }]
+        });
+    }
+}
+
+/* =====================
+   VẼ DOT
+===================== */
+function drawDot(x,y,color){
+    ctx.beginPath();
+    ctx.arc(x,y,4,0,Math.PI*2);
+    ctx.fillStyle=color;
+    ctx.shadowBlur=12;
+    ctx.shadowColor=color;
+    ctx.fill();
+    ctx.shadowBlur=0;
+}
+
+function randomColor(){
+    return ["#ff4d4d","#ffd700","#ff66cc","#ffffff"][Math.floor(Math.random()*4)];
+}
+
+/* =====================
+   ĐỒ ĂN
+===================== */
+function spawnFood(){
+    const items=["thit_kho.png","banh_tet.png"];
+    const img=document.createElement("img");
+    img.src="images/"+items[Math.floor(Math.random()*items.length)];
+    img.className="food-floating";
+    img.style.left=Math.random()*100+"vw";
+    img.style.animationDuration=8+Math.random()*5+"s";
+    document.body.appendChild(img);
+    setTimeout(()=>img.remove(),15000);
+}
+
+/* =====================
+   TAB VISIBILITY
+===================== */
+document.addEventListener("visibilitychange",()=>{
+    tabActive=!document.hidden;
+    if (tabActive && !messageContainer.classList.contains("hidden")) {
+        startTextFirework();
     }
 });
