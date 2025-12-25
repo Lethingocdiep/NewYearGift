@@ -1,3 +1,6 @@
+/* =====================
+   DOM
+===================== */
 const heart = document.getElementById("heart");
 const heartContainer = document.getElementById("heart-container");
 const envelopeContainer = document.getElementById("envelope-container");
@@ -9,14 +12,38 @@ const backgroundMusic = document.getElementById("backgroundMusic");
 const fireworkSound = document.getElementById("fireworksSound");
 
 /* =====================
-   ÂM THANH
+   ❤️ HEART BEAT (BPM REAL)
 ===================== */
+let heartBPM = 92;
+let heartInterval = null;
+let heartClicked = false;
+
 thumpSound.volume = 0.8;
 thumpSound.playbackRate = 0.95;
-thumpSound.play();
 
+function startHeartBeat() {
+    if (heartInterval || heartClicked) return;
+
+    const interval = 60000 / heartBPM;
+    heartInterval = setInterval(() => {
+        thumpSound.currentTime = 0;
+        thumpSound.play().catch(()=>{});
+    }, interval);
+}
+
+function stopHeartBeat() {
+    if (heartInterval) {
+        clearInterval(heartInterval);
+        heartInterval = null;
+    }
+}
+
+window.addEventListener("load", startHeartBeat);
+
+/* =====================
+   STATE
+===================== */
 fireworkSound.volume = 0.6;
-
 let popPlayed = false;
 let foodStarted = false;
 let tabActive = true;
@@ -25,8 +52,16 @@ let tabActive = true;
    CLICK TRÁI TIM
 ===================== */
 heart.addEventListener("click", () => {
-    heartContainer.classList.add("hidden");
-    envelopeContainer.classList.remove("hidden");
+    heartClicked = true;
+    stopHeartBeat();
+
+    heartContainer.classList.add("fade-out");
+
+    setTimeout(() => {
+        heartContainer.classList.add("hidden");
+        envelopeContainer.classList.remove("hidden");
+    }, 600);
+
     createMaiRain();
 
     if (!foodStarted) {
@@ -62,7 +97,7 @@ document.getElementById("envelope").addEventListener("click", () => {
 });
 
 /* =====================
-   HOA MAI
+   🌼 HOA MAI
 ===================== */
 function createMaiRain() {
     setInterval(() => {
@@ -77,7 +112,7 @@ function createMaiRain() {
 }
 
 /* =====================
-   CANVAS
+   🎆 CANVAS
 ===================== */
 const canvas = document.getElementById("fireworks-canvas");
 const ctx = canvas.getContext("2d");
@@ -113,10 +148,8 @@ function launchFireworks() {
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    /* TEXT FIREWORK */
     if (textPhase !== "idle") handleTextFirework();
 
-    /* PHÁO HOA THƯỜNG */
     fireworks.forEach((fw, i) => {
         if (!fw.exploded) {
             fw.y -= 5;
@@ -164,7 +197,7 @@ function generateTextPoints(text) {
     off.height = canvas.height;
     const c = off.getContext("2d");
 
-    c.font = "bold 110px Segoe UI";
+    c.font = "bold 120px Segoe UI";
     c.textAlign = "center";
     c.textBaseline = "middle";
     c.fillText(text, off.width / 2, off.height * 0.45);
@@ -189,7 +222,7 @@ function startTextFirework() {
     heartBursted = false;
     textPhase = "rain";
 
-    for (let i=0;i<700;i++){
+    for (let i=0;i<800;i++){
         textParticles.push({
             x: Math.random()*canvas.width,
             y: -Math.random()*canvas.height,
@@ -222,7 +255,7 @@ function handleTextFirework(){
     if (textPhase==="gather"&&!heartBursted){
         heartBursted=true;
         burstHeartFireworks();
-        setTimeout(()=>textPhase="hold",600);
+        setTimeout(()=>textPhase="hold",800);
     }
 
     if (textPhase==="hold"){
@@ -232,7 +265,7 @@ function handleTextFirework(){
                 p.vx=Math.cos(Math.random()*Math.PI*2)*4;
                 p.vy=Math.sin(Math.random()*Math.PI*2)*4;
             });
-        },3000);
+        },3500);
     }
 
     if (textPhase==="explode"){
@@ -266,20 +299,21 @@ function burstHeartFireworks(){
 }
 
 /* =====================
-   VẼ DOT
+   DRAW DOT
 ===================== */
 function drawDot(x,y,color){
     ctx.beginPath();
     ctx.arc(x,y,4,0,Math.PI*2);
     ctx.fillStyle=color;
-    ctx.shadowBlur=12;
+    ctx.shadowBlur=14;
     ctx.shadowColor=color;
     ctx.fill();
     ctx.shadowBlur=0;
 }
 
 function randomColor(){
-    return ["#ff4d4d","#ffd700","#ff66cc","#ffffff"][Math.floor(Math.random()*4)];
+    return ["#ff4d4d","#ffd700","#ff66cc","#ffffff"]
+        [Math.floor(Math.random()*4)];
 }
 
 /* =====================
