@@ -44,15 +44,20 @@ heart.addEventListener("click", () => {
    CLICK ENVELOPE
 ===================== */
 document.getElementById("envelope").addEventListener("click", () => {
-    envelopeOpened = true;
-
     envelopeContainer.classList.add("hidden");
     messageContainer.classList.remove("hidden");
 
-    popSound.volume = 0.8;
-    popSound.play();
+    if (!popPlayed) {
+        popSound.volume = 0.8;
+        popSound.play();
+        popPlayed = true;
+    }
 
-    fireworksEnabled = true;
+    // 🔧 FIX QUAN TRỌNG:
+    // đợi browser render xong lời chúc + hình
+    setTimeout(() => {
+        launchFireworks();
+    }, 120); // chỉ cần 1 frame + chút buffer
 });
 
 /* =====================
