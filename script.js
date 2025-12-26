@@ -19,13 +19,21 @@ let tabActive = true;
 
 let fireworksEnabled = false;
 let textMode = false;
+let popPlayed = false;
+
+const canvas = document.getElementById("fireworks-canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let fireworks = [];
+let textParticles = [];
 
 /* =====================
    CLICK HEART
 ===================== */
 heart.addEventListener("click", () => {
     giftStarted = true;
-
     heartContainer.classList.add("fade-out");
     setTimeout(() => {
         heartContainer.classList.add("hidden");
@@ -45,41 +53,24 @@ heart.addEventListener("click", () => {
 ===================== */
 document.getElementById("envelope").addEventListener("click", () => {
     envelopeContainer.classList.add("hidden");
-    messageContainer.classList.remove("hidden");
+    messageContainer.classList.remove("hidden"); // show lời chúc + hình
+    envelopeOpened = true;
 
+    fireworksEnabled = true; // pháo hoa thường bắn
     if (!popPlayed) {
         popSound.volume = 0.8;
         popSound.play();
         popPlayed = true;
     }
-
-    // 🔧 FIX QUAN TRỌNG:
-    // đợi browser render xong lời chúc + hình
-    setTimeout(() => {
-        launchFireworks();
-    }, 120); // chỉ cần 1 frame + chút buffer
 });
 
 /* =====================
-   CANVAS
-===================== */
-const canvas = document.getElementById("fireworks-canvas");
-const ctx = canvas.getContext("2d");
-
-canvas.width = innerWidth;
-canvas.height = innerHeight;
-
-let fireworks = [];
-let textParticles = [];
-let textTimer = 0;
-
-/* =====================
-   FIREWORK LOOP (DUY NHẤT)
+   FIREWORK LOOP
 ===================== */
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 🔥 pháo hoa thường
+    // pháo hoa thường
     if (fireworksEnabled && !textMode) {
         if (Math.random() < 0.04) spawnFirework();
     }
@@ -120,7 +111,7 @@ function animate() {
         }
     });
 
-    // 💬 TEXT MODE
+    // text mode
     if (textMode) handleText();
 
     requestAnimationFrame(animate);
@@ -146,21 +137,18 @@ function spawnFirework() {
 ===================== */
 document.addEventListener("visibilitychange", () => {
     tabActive = !document.hidden;
-
     if (!giftStarted || !envelopeOpened) return;
 
     if (!tabActive) {
-        fireworksEnabled = false; // ngưng bắn mới
+        fireworksEnabled = false; // pháo hoa ngưng
+        messageContainer.style.visibility = "hidden"; // ẩn lời chúc + hình
     } else {
-        // quay lại tab
-        fireworks.forEach(fw => {
-            if (!fw.exploded) fw.vy = -8; // rơi rào
-        });
-
+        // pháo hoa rơi rào
+        fireworks.forEach(fw => { if (!fw.exploded) fw.vy = -8; });
         fireworkSound.currentTime = 0;
         fireworkSound.play();
 
-        startTextSequence();
+        startTextSequence(); // chữ Ich vermisse dich
     }
 });
 
@@ -171,9 +159,7 @@ function startTextSequence() {
     if (textMode) return;
 
     textMode = true;
-    fireworksEnabled = false;
-
-    messageContainer.classList.add("hidden-soft");
+    fireworksEnabled = true;
     generateText("Ich vermisse dich");
 
     setTimeout(() => burstHeart(), 1200);
@@ -183,8 +169,7 @@ function startTextSequence() {
 function endText() {
     textMode = false;
     fireworksEnabled = true;
-    messageContainer.classList.remove("hidden-soft");
-    textParticles = [];
+    messageContainer.style.visibility = "visible"; // show lại lời chúc + hình
 }
 
 /* =====================
@@ -193,22 +178,24 @@ function endText() {
 function generateText(text) {
     const off = document.createElement("canvas");
     off.width = canvas.width;
-    off.height = 200;
+    off.height = canvas.height;
 
     const c = off.getContext("2d");
-    c.font = "900 120px Segoe UI";
+    c.font = "bold 120px Segoe UI";
     c.textAlign = "center";
-    c.fillText(text, off.width / 2, 140);
+    c.textBaseline = "middle";
+    c.fillStyle = "white";
+    c.fillText(text, off.width / 2, off.height * 0.45);
 
     const d = c.getImageData(0, 0, off.width, off.height).data;
     textParticles = [];
 
-    for (let y = 0; y < off.height; y += 3) {
-        for (let x = 0; x < off.width; x += 3) {
+    for (let y = 0; y < off.height; y += 2) {
+        for (let x = 0; x < off.width; x += 2) {
             if (d[(y * off.width + x) * 4 + 3] > 150) {
                 textParticles.push({
                     x: x,
-                    y: y + canvas.height * 0.35,
+                    y: y,
                     life: 180
                 });
             }
@@ -248,7 +235,7 @@ function burstHeart() {
 }
 
 /* =====================
-   DRAW
+   DRAW & COLORS
 ===================== */
 function drawDot(x, y, color) {
     ctx.beginPath();
