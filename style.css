@@ -1,125 +1,130 @@
+/* =====================
+   BODY & BASIC
+===================== */
 body {
     margin: 0;
-    background: #8b0000;
-    overflow: hidden;
+    padding: 0;
+    overflow: hidden; /* tránh scroll khi hoa mai / đồ ăn rơi */
+    background: #000; /* nền tối cho pháo hoa nổi bật */
     font-family: "Segoe UI", sans-serif;
-    color: white;
 }
 
-/* ================= TRÁI TIM (GIỮ NGUYÊN) ================= */
+/* =====================
+   HEART
+===================== */
 #heart-container {
-    position: absolute;
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    z-index: 20;
     cursor: pointer;
+    transition: opacity 0.6s ease;
+}
+
+#heart-container.fade-out {
+    opacity: 0;
 }
 
 #heart {
-    width: 200px;
-    animation: heartbeat 1s infinite;
+    width: 100px;
+    height: 100px;
+    background: url("images/heart.png") no-repeat center/contain;
 }
 
-@keyframes heartbeat {
-    0% { transform: scale(1); }
-    25% { transform: scale(1.15); }
-    50% { transform: scale(1); }
-}
-
-/* ================= PHONG BAO ================= */
+/* =====================
+   ENVELOPE
+===================== */
 #envelope-container {
-    position: absolute;
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-}
-
-#envelope {
-    width: 230px;
+    z-index: 20;
     cursor: pointer;
-}
-
-/* ================= LỜI CHÚC + ẢNH ================= */
-#message-container {
-    position: absolute;
-    top: 55%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    width: 90%;
-    max-width: 420px;
-    line-height: 1.6;
-    text-shadow: 0 0 6px rgba(255,255,255,0.4);
-    transition: opacity 0.6s ease;
-    z-index: 10;
-}
-
-#couple-img {
-    width: 100%;
-    border-radius: 16px;
-    margin-top: 12px;
-    border: 2px solid gold;
-    box-shadow:
-        0 0 10px rgba(255,215,0,0.6),
-        0 0 20px rgba(255,215,0,0.4);
-}
-
-/* ================= ẨN ================= */
-.hidden {
     display: none;
 }
 
-.hidden-soft {
-    opacity: 0;
-    pointer-events: none;
+#envelope-container.hidden {
+    display: none;
 }
 
-/* ================= CHỮ ICH VERMISSE DICH ================= */
-#miss-text {
+/* =====================
+   MESSAGE CONTAINER
+===================== */
+#message-container {
     position: fixed;
-    top: 50%;
+    top: 20%;
     left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 44px;
-    font-weight: 900;
-    letter-spacing: 3px;
+    transform: translateX(-50%);
+    z-index: 25;
+    text-align: center;
     color: #fff;
-    opacity: 0;
-    z-index: 999;
-    pointer-events: none;
-    text-shadow:
-        0 0 10px rgba(255,255,255,1),
-        0 0 25px rgba(255,180,200,1),
-        0 0 45px rgba(255,120,160,1);
-    transition: opacity 0.8s ease;
+    transition: opacity 0.5s ease;
+    opacity: 1;
 }
 
-/* ================= CANVAS PHÁO HOA ================= */
+#message-container.hidden-soft {
+    opacity: 0;
+}
+
+/* =====================
+   CANVAS
+===================== */
 #fireworks-canvas {
     position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 5;
+    top: 0;
+    left: 0;
+    z-index: 10; /* dưới message / envelope / heart */
+    pointer-events: none; /* click vẫn đi qua */
 }
 
-/* ================= HOA MAI ================= */
-.mayflower {
-    position: fixed;
-    top: -40px;
-    width: 35px;
-    animation: fall linear infinite;
-}
-
-@keyframes fall {
-    to {
-        transform: translateY(120vh) rotate(360deg);
-    }
-}
-
-/* ================= ĐỒ ĂN ================= */
-.food-floating {
+/* =====================
+   FLOWERING OBJECTS
+===================== */
+.mayflower, .food-floating {
     position: fixed;
     top: -50px;
+    z-index: 5;
+    pointer-events: none;
     width: 50px;
-    animation: fall linear;
+    height: auto;
+    animation-timing-function: linear;
+}
+
+/* hoa mai rơi */
+.mayflower {
+    animation-name: fallMai;
+    animation-fill-mode: forwards;
+}
+
+@keyframes fallMai {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+}
+
+/* đồ ăn nổi lên / rơi */
+.food-floating {
+    animation-name: fallFood;
+    animation-fill-mode: forwards;
+}
+
+@keyframes fallFood {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(100vh); opacity: 0; }
+}
+
+/* =====================
+   RESPONSIVE
+===================== */
+@media (max-width: 768px) {
+    #heart { width: 70px; height: 70px; }
+    .mayflower, .food-floating { width: 35px; }
+    #message-container { top: 15%; font-size: 14px; }
+}
+
+@media (min-width: 1920px) {
+    #heart { width: 150px; height: 150px; }
+    .mayflower, .food-floating { width: 70px; }
+    #message-container { font-size: 20px; }
 }
