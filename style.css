@@ -6,7 +6,7 @@ body {
     color: white;
 }
 
-/* ================= TRÁI TIM (GIỮ NGUYÊN) ================= */
+/* ================= TRÁI TIM ================= */
 #heart-container {
     position: absolute;
     top: 50%;
@@ -122,4 +122,10 @@ body {
     top: -50px;
     width: 50px;
     animation: fall linear;
+    animation-iteration-count: 1;
+}
+
+/* ================= HIỆN CHỮ TEXT ================= */
+.text-active {
+    opacity: 1 !important;
 }
