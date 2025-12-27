@@ -1,50 +1,61 @@
 /* ===================== DOM ===================== */
-const heart = document.getElementById("heart");
 const heartContainer = document.getElementById("heart-container");
+const heart = document.getElementById("heart");
+
 const envelopeContainer = document.getElementById("envelope-container");
 const envelope = document.getElementById("envelope");
-const messageContainer = document.getElementById("message-container");
 
-const bgMusic = document.getElementById("backgroundMusic");
-const popSound = document.getElementById("popSound");
-const fireSound = document.getElementById("fireworksSound");
-const thumpSound = document.getElementById("thumpSound");
+const messageContainer = document.getElementById("message-container");
 
 const canvas = document.getElementById("fireworks-canvas");
 const ctx = canvas.getContext("2d");
+
+const backgroundMusic = document.getElementById("backgroundMusic");
+const popSound = document.getElementById("popSound");
+const fireworkSound = document.getElementById("fireworksSound");
+
+/* ===================== CANVAS ===================== */
 canvas.width = innerWidth;
 canvas.height = innerHeight;
+window.addEventListener("resize", () => {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+});
 
 /* ===================== STATE ===================== */
-let started = false;
+let giftStarted = false;
 let envelopeOpened = false;
-let fireworksEnabled = false;
-let textMode = false;
+let fireworksActive = false;
+let isTabActive = true;
+let isTextMode = false;
+
 let fireworks = [];
 let textParticles = [];
 
-/* ===================== HEART THUMP ===================== */
-thumpSound.loop = true;
-thumpSound.volume = 0.5;
-thumpSound.play();
+/* ===================== LOAD PAGE ===================== */
+// chỉ có tim đập – click được
+envelopeContainer.classList.add("hidden");
+messageContainer.classList.add("hidden");
 
 /* ===================== CLICK HEART ===================== */
-heart.addEventListener("click", () => {
-    if (started) return;
-    started = true;
+heartContainer.addEventListener("click", () => {
+    if (giftStarted) return;
+    giftStarted = true;
 
-    thumpSound.pause();
-    thumpSound.currentTime = 0;
-
+    // tim biến mất
     heartContainer.classList.add("hidden");
+
+    // phong bì xuất hiện
     envelopeContainer.classList.remove("hidden");
 
-    startMaiRain();
+    // hoa mai + đồ ăn rơi
+    createMaiRain();
     startFoodRain();
 
-    bgMusic.loop = true;
-    bgMusic.volume = 0.3;
-    bgMusic.play();
+    // nhạc chạy
+    backgroundMusic.loop = true;
+    backgroundMusic.volume = 0.35;
+    backgroundMusic.play().catch(() => {});
 });
 
 /* ===================== CLICK ENVELOPE ===================== */
@@ -52,104 +63,123 @@ envelope.addEventListener("click", () => {
     if (envelopeOpened) return;
     envelopeOpened = true;
 
+    // ẨN TOÀN BỘ CONTAINER (KHÔNG CHE LỜI CHÚC)
     envelopeContainer.classList.add("hidden");
+
+    // hiện lời chúc + hình
     messageContainer.classList.remove("hidden");
 
-    popSound.volume = 0.8;
-    popSound.play();
+    // âm mở phong bì
+    popSound.currentTime = 0;
+    popSound.play().catch(() => {});
 
-    fireworksEnabled = true;
+    // pháo hoa bắn liên tục
+    fireworksActive = true;
 });
 
-/* ===================== VISIBILITY ===================== */
+/* ===================== TAB VISIBILITY ===================== */
 document.addEventListener("visibilitychange", () => {
+    isTabActive = !document.hidden;
+
     if (!envelopeOpened) return;
 
-    if (document.hidden) {
-        fireworksEnabled = false;
-        textMode = false;
+    if (!isTabActive) {
+        // rời tab → pháo hoa ngưng + tụ
+        fireworksActive = false;
+        isTextMode = false;
     } else {
-        startTextSequence();
+        // quay lại tab
+        rainFireworksDown();
+        startMissTextSequence();
     }
 });
 
-/* ===================== TEXT SEQUENCE ===================== */
-function startTextSequence() {
-    if (textMode) return;
+/* ===================== MISS TEXT SEQUENCE ===================== */
+function startMissTextSequence() {
+    if (isTextMode) return;
+    isTextMode = true;
 
-    textMode = true;
-    fireworksEnabled = false;
+    // ẨN lời chúc + hình tạm thời
     messageContainer.classList.add("hidden-soft");
 
     generateText("Ich vermisse dich");
-    heartFirework();
 
+    // pháo hoa trái tim
+    setTimeout(() => heartFirework(), 800);
+
+    // đủ lâu để đọc → quay lại bình thường
     setTimeout(() => {
-        textMode = false;
-        fireworksEnabled = true;
-        messageContainer.classList.remove("hidden-soft");
+        isTextMode = false;
         textParticles = [];
+        messageContainer.classList.remove("hidden-soft");
+        fireworksActive = true;
     }, 4200);
 }
 
-/* ===================== FIREWORK LOOP ===================== */
-function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    if (fireworksEnabled && Math.random() < 0.06) spawnFirework();
-
-    fireworks.forEach((fw, i) => {
-        if (!fw.exploded) {
-            fw.y -= fw.vy;
-            drawDot(fw.x, fw.y, "#fff");
-            if (fw.y <= fw.targetY) explode(fw);
-        } else {
-            fw.particles.forEach(p => {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.life--;
-                drawDot(p.x, p.y, p.color);
-            });
-            fw.particles = fw.particles.filter(p => p.life > 0);
-        }
-        if (fw.exploded && fw.particles.length === 0) fireworks.splice(i, 1);
-    });
-
-    if (textMode) drawTextParticles();
-    requestAnimationFrame(animate);
-}
-animate();
-
-/* ===================== FIREWORK HELPERS ===================== */
+/* ===================== FIREWORK ENGINE ===================== */
 function spawnFirework() {
     fireworks.push({
         x: Math.random() * canvas.width,
         y: canvas.height,
-        targetY: canvas.height * (0.2 + Math.random() * 0.3),
+        targetY: canvas.height * (0.25 + Math.random() * 0.25),
         vy: 6,
         exploded: false,
         particles: []
     });
 }
 
-function explode(fw) {
-    fw.exploded = true;
-    fireSound.currentTime = 0;
-    fireSound.play();
-
-    for (let i = 0; i < 50; i++) {
-        fw.particles.push({
-            x: fw.x,
-            y: fw.y,
-            vx: Math.cos(Math.random() * Math.PI * 2) * 3,
-            vy: Math.sin(Math.random() * Math.PI * 2) * 3,
-            life: 50,
-            color: randomColor()
-        });
+function updateFireworks() {
+    if (fireworksActive && !isTextMode && Math.random() < 0.05) {
+        spawnFirework();
     }
+
+    fireworks.forEach((fw, i) => {
+        if (!fw.exploded) {
+            fw.y -= fw.vy;
+            drawDot(fw.x, fw.y, "#fff");
+
+            if (fw.y <= fw.targetY) {
+                fw.exploded = true;
+                fireworkSound.currentTime = 0;
+                fireworkSound.play().catch(() => {});
+
+                for (let p = 0; p < 45; p++) {
+                    fw.particles.push({
+                        x: fw.x,
+                        y: fw.y,
+                        vx: Math.cos(Math.random() * Math.PI * 2) * 3,
+                        vy: Math.sin(Math.random() * Math.PI * 2) * 3,
+                        life: 50,
+                        color: randomColor()
+                    });
+                }
+            }
+        } else {
+            fw.particles.forEach(pt => {
+                pt.x += pt.vx;
+                pt.y += pt.vy;
+                pt.life--;
+                drawDot(pt.x, pt.y, pt.color);
+            });
+            fw.particles = fw.particles.filter(p => p.life > 0);
+        }
+
+        if (fw.exploded && fw.particles.length === 0) {
+            fireworks.splice(i, 1);
+        }
+    });
 }
 
-/* ===================== TEXT ===================== */
+/* ===================== TAB RETURN RAIN ===================== */
+function rainFireworksDown() {
+    fireworks.forEach(fw => {
+        if (!fw.exploded) fw.vy = -8;
+    });
+    fireworkSound.currentTime = 0;
+    fireworkSound.play().catch(() => {});
+}
+
+/* ===================== TEXT PARTICLES ===================== */
 function generateText(text) {
     const off = document.createElement("canvas");
     off.width = canvas.width;
@@ -157,8 +187,8 @@ function generateText(text) {
     const c = off.getContext("2d");
 
     c.font = "900 120px Segoe UI";
-    c.fillStyle = "#fff";
     c.textAlign = "center";
+    c.fillStyle = "#fff";
     c.fillText(text, off.width / 2, 140);
 
     const data = c.getImageData(0, 0, off.width, off.height).data;
@@ -167,7 +197,11 @@ function generateText(text) {
     for (let y = 0; y < off.height; y += 3) {
         for (let x = 0; x < off.width; x += 3) {
             if (data[(y * off.width + x) * 4 + 3] > 150) {
-                textParticles.push({ x, y: y + canvas.height * 0.35, life: 200 });
+                textParticles.push({
+                    x,
+                    y: y + canvas.height * 0.35,
+                    life: 200
+                });
             }
         }
     }
@@ -186,8 +220,8 @@ function heartFirework() {
     const cx = canvas.width / 2;
     const cy = canvas.height * 0.4;
 
-    for (let i = 0; i < 140; i++) {
-        const t = i / 140 * Math.PI * 2;
+    for (let i = 0; i < 120; i++) {
+        const t = (i / 120) * Math.PI * 2;
         fireworks.push({
             exploded: true,
             particles: [{
@@ -195,8 +229,8 @@ function heartFirework() {
                 y: cy,
                 vx: Math.cos(t) * 4,
                 vy: Math.sin(t) * 4,
-                life: 50,
-                color: "#ff66cc"
+                life: 40,
+                color: i % 2 ? "#ff66cc" : "#fff"
             }]
         });
     }
@@ -205,7 +239,7 @@ function heartFirework() {
 /* ===================== DRAW ===================== */
 function drawDot(x, y, color) {
     ctx.beginPath();
-    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.arc(x, y, 3.5, 0, Math.PI * 2);
     ctx.fillStyle = color;
     ctx.shadowBlur = 6;
     ctx.shadowColor = color;
@@ -214,11 +248,22 @@ function drawDot(x, y, color) {
 }
 
 function randomColor() {
-    return ["#ff4d4d", "#ffd700", "#ff66cc", "#ffffff"][Math.floor(Math.random() * 4)];
+    return ["#ff4d4d", "#ffd700", "#ff66cc", "#ffffff"][
+        Math.floor(Math.random() * 4)
+    ];
 }
 
-/* ===================== FALLING ITEMS ===================== */
-function startMaiRain() {
+/* ===================== LOOP ===================== */
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    updateFireworks();
+    if (isTextMode) drawTextParticles();
+    requestAnimationFrame(animate);
+}
+animate();
+
+/* ===================== MAI + FOOD RAIN ===================== */
+function createMaiRain() {
     setInterval(() => {
         const img = document.createElement("img");
         img.src = "images/mai.png";
@@ -226,19 +271,19 @@ function startMaiRain() {
         img.style.left = Math.random() * 100 + "vw";
         img.style.animationDuration = 3 + Math.random() * 3 + "s";
         document.body.appendChild(img);
-        setTimeout(() => img.remove(), 8000);
-    }, 180);
+        setTimeout(() => img.remove(), 7000);
+    }, 180); // DÀY HƠN
 }
 
 function startFoodRain() {
+    const foods = ["thit_kho.png", "banh_tet.png"];
     setInterval(() => {
-        const foods = ["thit_kho.png", "banh_tet.png"];
         const img = document.createElement("img");
         img.src = "images/" + foods[Math.floor(Math.random() * foods.length)];
         img.className = "food-floating";
         img.style.left = Math.random() * 100 + "vw";
-        img.style.animationDuration = 6 + Math.random() * 4 + "s";
+        img.style.animationDuration = 7 + Math.random() * 4 + "s";
         document.body.appendChild(img);
-        setTimeout(() => img.remove(), 12000);
-    }, 2000);
+        setTimeout(() => img.remove(), 14000);
+    }, 2200); // DÀY HƠN
 }
