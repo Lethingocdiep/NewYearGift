@@ -1,333 +1,214 @@
-/* =====================================================
-   DOM
-===================================================== */
-const heart = document.getElementById("heart");
+/* =====================
+   ELEMENTS
+===================== */
 const heartContainer = document.getElementById("heart-container");
 const envelopeContainer = document.getElementById("envelope-container");
-const envelope = document.getElementById("envelope");
 const messageContainer = document.getElementById("message-container");
-const canvas = document.getElementById("fireworks-canvas");
-const ctx = canvas.getContext("2d");
+const fireworksCanvas = document.getElementById("fireworks-canvas");
+const ctx = fireworksCanvas.getContext("2d");
 
-/* =====================================================
-   CANVAS
-===================================================== */
-canvas.width = innerWidth;
-canvas.height = innerHeight;
-window.addEventListener("resize", () => {
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
-});
-
-/* =====================================================
-   AUDIO (PATH KHỚP FOLDER CỦA BẠN)
-===================================================== */
-const thumpSound = new Audio("audio/thump.mp3");
-thumpSound.volume = 0.8;
-
-const backgroundMusic = new Audio("audio/background.mp3");
-backgroundMusic.loop = true;
-backgroundMusic.volume = 0.6;
-
-const popSound = new Audio("audio/pop.mp3");
-popSound.volume = 0.8;
+/* =====================
+   AUDIO
+===================== */
+const bgMusic = new Audio("audio/background.mp3");
+bgMusic.loop = true;
 
 const fireworkSound = new Audio("audio/fireworks.mp3");
-fireworkSound.volume = 0.9;
+const popSound = new Audio("audio/pop.mp3");
+const thumpSound = new Audio("audio/thump.mp3");
 
-/* =====================================================
+/* =====================
    STATE
-===================================================== */
+===================== */
 let heartClicked = false;
 let envelopeOpened = false;
-let tabActive = true;
+let isTabHidden = false;
+let fireworksRunning = false;
 
-let heartInterval = null;
-const heartBPM = 92;
+/* =====================
+   INIT
+===================== */
+envelopeContainer.classList.add("hidden");
+messageContainer.classList.add("hidden");
+resizeCanvas();
 
-let fireworks = [];
-let fireworksEnabled = false;
-
-let textParticles = [];
-let textMode = false;
-let heartBurstDone = false;
-
-/* =====================================================
-   ❤️ HEART BEAT (CHỈ LÚC LOAD)
-===================================================== */
-function startHeartBeat() {
-    if (heartInterval || heartClicked) return;
-    const interval = 60000 / heartBPM;
-    heartInterval = setInterval(() => {
-        thumpSound.currentTime = 0;
-        thumpSound.play().catch(() => {});
-    }, interval);
-}
-
-function stopHeartBeat() {
-    clearInterval(heartInterval);
-    heartInterval = null;
-}
-
-window.addEventListener("load", startHeartBeat);
-
-/* =====================================================
-   CLICK HEART
-===================================================== */
-heart.addEventListener("click", () => {
+/* =====================
+   HEART CLICK
+===================== */
+heartContainer.addEventListener("click", () => {
     if (heartClicked) return;
     heartClicked = true;
-    stopHeartBeat();
 
-    heartContainer.classList.add("fade-out");
-    setTimeout(() => {
-        heartContainer.classList.add("hidden");
-        envelopeContainer.classList.remove("hidden");
-    }, 600);
+    thumpSound.play();
 
-    createMaiRain();
-    startFoodRain();
+    heartContainer.classList.add("hidden");
+    envelopeContainer.classList.remove("hidden");
 
-    backgroundMusic.play().catch(() => {});
+    startFallingItems();
+    bgMusic.play();
 });
 
-/* =====================================================
-   CLICK ENVELOPE
-===================================================== */
-envelope.addEventListener("click", () => {
+/* =====================
+   ENVELOPE CLICK
+===================== */
+envelopeContainer.addEventListener("click", () => {
     if (envelopeOpened) return;
     envelopeOpened = true;
 
-    envelopeContainer.classList.add("hidden");
+    popSound.play();
+
     messageContainer.classList.remove("hidden");
-
-    popSound.currentTime = 0;
-    popSound.play().catch(() => {});
-
-    fireworksEnabled = true;
+    startFireworks();
 });
 
-/* =====================================================
-   VISIBILITY CHANGE
-===================================================== */
+/* =====================
+   TAB VISIBILITY
+===================== */
 document.addEventListener("visibilitychange", () => {
-    tabActive = !document.hidden;
-
-    if (!envelopeOpened) return;
-
-    if (!tabActive) {
-        fireworksEnabled = false;
-        textMode = false;
+    if (document.hidden) {
+        isTabHidden = true;
+        stopFireworks();
+        messageContainer.classList.add("hidden");
     } else {
-        // Pháo rơi "rào"
-        fireworks.forEach(fw => {
-            if (!fw.exploded) fw.vy = 10;
-        });
-
-        fireworkSound.currentTime = 0;
-        fireworkSound.play().catch(() => {});
-
-        startTextSequence();
+        if (!isTabHidden || !envelopeOpened) return;
+        isTabHidden = false;
+        comebackEffect();
     }
 });
 
-/* =====================================================
-   TEXT SEQUENCE – "ICH VERMISSE DICH"
-===================================================== */
-function startTextSequence() {
-    if (textMode) return;
-    textMode = true;
-    fireworksEnabled = false;
-    heartBurstDone = false;
-
-    messageContainer.classList.add("hidden-soft");
-
-    generateText("Ich vermisse dich");
-
-    setTimeout(() => {
-        burstHeart();
-        heartBurstDone = true;
-    }, 1500);
-
-    setTimeout(() => {
-        endTextSequence();
-    }, 4500);
-}
-
-function endTextSequence() {
-    textMode = false;
-    fireworksEnabled = true;
-    messageContainer.classList.remove("hidden-soft");
-    textParticles = [];
-}
-
-/* =====================================================
-   FIREWORK LOOP
-===================================================== */
-function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    if (fireworksEnabled && tabActive && Math.random() < 0.05) {
-        spawnFirework();
-    }
-
-    fireworks.forEach((fw, i) => {
-        if (!fw.exploded) {
-            fw.y -= fw.vy;
-            drawDot(fw.x, fw.y, "#fff");
-
-            if (fw.y <= fw.targetY) {
-                fw.exploded = true;
-                fireworkSound.currentTime = 0;
-                fireworkSound.play().catch(() => {});
-
-                for (let p = 0; p < 40; p++) {
-                    fw.particles.push({
-                        x: fw.x,
-                        y: fw.y,
-                        vx: Math.cos(Math.random() * Math.PI * 2) * 3,
-                        vy: Math.sin(Math.random() * Math.PI * 2) * 3,
-                        life: 50,
-                        color: randomColor()
-                    });
-                }
-            }
-        } else {
-            fw.particles.forEach(pt => {
-                pt.x += pt.vx;
-                pt.y += pt.vy;
-                pt.life--;
-                drawDot(pt.x, pt.y, pt.color);
-            });
-            fw.particles = fw.particles.filter(p => p.life > 0);
-        }
-
-        if (fw.exploded && fw.particles.length === 0) {
-            fireworks.splice(i, 1);
-        }
-    });
-
-    if (textMode) drawTextParticles();
-
-    requestAnimationFrame(animate);
-}
-animate();
-
-function spawnFirework() {
-    fireworks.push({
-        x: Math.random() * canvas.width,
-        y: canvas.height,
-        targetY: canvas.height * (0.25 + Math.random() * 0.25),
-        vy: 6,
-        exploded: false,
-        particles: []
-    });
-}
-
-/* =====================================================
-   TEXT PARTICLES
-===================================================== */
-function generateText(text) {
-    const off = document.createElement("canvas");
-    off.width = canvas.width;
-    off.height = 220;
-    const c = off.getContext("2d");
-
-    c.font = "900 120px Segoe UI";
-    c.textAlign = "center";
-    c.textBaseline = "middle";
-    c.fillStyle = "#fff";
-    c.fillText(text, off.width / 2, off.height / 2);
-
-    const d = c.getImageData(0, 0, off.width, off.height).data;
-    textParticles = [];
-
-    for (let y = 0; y < off.height; y += 3) {
-        for (let x = 0; x < off.width; x += 3) {
-            if (d[(y * off.width + x) * 4 + 3] > 150) {
-                textParticles.push({
-                    x: x,
-                    y: y + canvas.height * 0.35,
-                    life: 200
-                });
-            }
-        }
-    }
-}
-
-function drawTextParticles() {
-    textParticles.forEach(p => {
-        drawDot(p.x, p.y, "#ffffff");
-        p.life--;
-    });
-    textParticles = textParticles.filter(p => p.life > 0);
-}
-
-/* =====================================================
-   💗 HEART FIREWORK
-===================================================== */
-function burstHeart() {
-    const cx = canvas.width / 2;
-    const cy = canvas.height * 0.4;
-
-    for (let i = 0; i < 120; i++) {
-        const t = (i / 120) * Math.PI * 2;
-        fireworks.push({
-            exploded: true,
-            particles: [{
-                x: cx,
-                y: cy,
-                vx: Math.cos(t) * 4,
-                vy: Math.sin(t) * 4,
-                life: 50,
-                color: i % 2 ? "#ff66cc" : "#ffffff"
-            }]
+/* =====================
+   COMEBACK EFFECT
+===================== */
+function comebackEffect() {
+    rainFireworks(() => {
+        showMissYouText(() => {
+            messageContainer.classList.remove("hidden");
+            startFireworks();
         });
+    });
+}
+
+/* =====================
+   MISS YOU TEXT
+===================== */
+function showMissYouText(done) {
+    const text = document.createElement("div");
+    text.textContent = "Ich vermisse dich";
+    text.style.position = "fixed";
+    text.style.top = "45%";
+    text.style.left = "50%";
+    text.style.transform = "translate(-50%, -50%)";
+    text.style.fontSize = "42px";
+    text.style.fontWeight = "600";
+    text.style.color = "#fff";
+    text.style.textShadow = "0 0 20px rgba(255,255,255,0.9)";
+    text.style.zIndex = 10;
+
+    document.body.appendChild(text);
+
+    heartFireworks();
+
+    setTimeout(() => {
+        text.remove();
+        done && done();
+    }, 3000);
+}
+
+/* =====================
+   FIREWORKS CORE
+===================== */
+function startFireworks() {
+    if (fireworksRunning) return;
+    fireworksRunning = true;
+    fireworkSound.play();
+    animateFireworks();
+}
+
+function stopFireworks() {
+    fireworksRunning = false;
+    fireworkSound.pause();
+}
+
+function animateFireworks() {
+    if (!fireworksRunning) return;
+    ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+    // simple sparkle demo (placeholder but stable)
+    for (let i = 0; i < 6; i++) {
+        ctx.fillStyle = `rgba(255,215,0,0.8)`;
+        ctx.beginPath();
+        ctx.arc(
+            Math.random() * fireworksCanvas.width,
+            Math.random() * fireworksCanvas.height,
+            2,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
     }
+    requestAnimationFrame(animateFireworks);
 }
 
-/* =====================================================
-   DRAW
-===================================================== */
-function drawDot(x, y, color) {
+/* =====================
+   SPECIAL EFFECTS
+===================== */
+function rainFireworks(done) {
+    let count = 0;
+    const interval = setInterval(() => {
+        ctx.fillStyle = "rgba(255,255,255,0.8)";
+        ctx.fillRect(
+            Math.random() * fireworksCanvas.width,
+            Math.random() * fireworksCanvas.height,
+            2,
+            10
+        );
+        count++;
+        if (count > 40) {
+            clearInterval(interval);
+            done && done();
+        }
+    }, 40);
+}
+
+function heartFireworks() {
+    // nhẹ – chỉ là hiệu ứng tượng trưng
+    ctx.fillStyle = "pink";
     ctx.beginPath();
-    ctx.arc(x, y, 4, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.shadowBlur = 6;
-    ctx.shadowColor = color;
+    ctx.arc(
+        fireworksCanvas.width / 2,
+        fireworksCanvas.height / 2,
+        30,
+        0,
+        Math.PI * 2
+    );
     ctx.fill();
-    ctx.shadowBlur = 0;
 }
 
-function randomColor() {
-    return ["#ff4d4d", "#ffd700", "#ff66cc", "#ffffff"]
-        [Math.floor(Math.random() * 4)];
+/* =====================
+   FALLING ITEMS
+===================== */
+function startFallingItems() {
+    spawnItem("images/mai.png", "mayflower", 3000);
+    spawnItem("images/banh_tet.png", "food-floating", 4000);
+    spawnItem("images/thit_kho.png", "food-floating", 5000);
 }
 
-/* =====================================================
-   HOA MAI + ĐỒ ĂN
-===================================================== */
-function createMaiRain() {
+function spawnItem(src, className, interval) {
     setInterval(() => {
-        const f = document.createElement("img");
-        f.src = "images/mai.png";
-        f.className = "mayflower";
-        f.style.left = Math.random() * 100 + "vw";
-        f.style.animationDuration = 4 + Math.random() * 4 + "s";
-        document.body.appendChild(f);
-        setTimeout(() => f.remove(), 8000);
-    }, 260);
-}
-
-function startFoodRain() {
-    setInterval(() => {
-        const items = ["thit_kho.png", "banh_tet.png"];
         const img = document.createElement("img");
-        img.src = "images/" + items[Math.floor(Math.random() * items.length)];
-        img.className = "food-floating";
+        img.src = src;
+        img.className = className;
         img.style.left = Math.random() * 100 + "vw";
-        img.style.animationDuration = 8 + Math.random() * 5 + "s";
+        img.style.animationDuration = 5 + Math.random() * 5 + "s";
         document.body.appendChild(img);
-        setTimeout(() => img.remove(), 15000);
-    }, 4000);
+        setTimeout(() => img.remove(), 12000);
+    }, interval);
 }
+
+/* =====================
+   CANVAS
+===================== */
+function resizeCanvas() {
+    fireworksCanvas.width = window.innerWidth;
+    fireworksCanvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resizeCanvas);
