@@ -32,8 +32,11 @@ let isTextMode = false;
 let fireworks = [];
 let textParticles = [];
 
+/* ❤️ VALENTINE EASTER EGG ===================== */
+let heartBeatCount = 0;        // đếm nhịp pháo tim
+let valentineShown = false;   // đảm bảo chỉ hiện 1 lần
+
 /* ===================== LOAD PAGE ===================== */
-// chỉ có tim đập – click được
 envelopeContainer.classList.add("hidden");
 messageContainer.classList.add("hidden");
 
@@ -42,17 +45,12 @@ heartContainer.addEventListener("click", () => {
     if (giftStarted) return;
     giftStarted = true;
 
-    // tim biến mất
     heartContainer.classList.add("hidden");
-
-    // phong bì xuất hiện
     envelopeContainer.classList.remove("hidden");
 
-    // hoa mai + đồ ăn rơi
     createMaiRain();
     startFoodRain();
 
-    // nhạc chạy
     backgroundMusic.loop = true;
     backgroundMusic.volume = 0.35;
     backgroundMusic.play().catch(() => {});
@@ -63,17 +61,12 @@ envelope.addEventListener("click", () => {
     if (envelopeOpened) return;
     envelopeOpened = true;
 
-    // ẨN TOÀN BỘ CONTAINER (KHÔNG CHE LỜI CHÚC)
     envelopeContainer.classList.add("hidden");
-
-    // hiện lời chúc + hình
     messageContainer.classList.remove("hidden");
 
-    // âm mở phong bì
     popSound.currentTime = 0;
     popSound.play().catch(() => {});
 
-    // pháo hoa bắn liên tục
     fireworksActive = true;
 });
 
@@ -84,11 +77,9 @@ document.addEventListener("visibilitychange", () => {
     if (!envelopeOpened) return;
 
     if (!isTabActive) {
-        // rời tab → pháo hoa ngưng + tụ
         fireworksActive = false;
         isTextMode = false;
     } else {
-        // quay lại tab
         rainFireworksDown();
         startMissTextSequence();
     }
@@ -99,15 +90,11 @@ function startMissTextSequence() {
     if (isTextMode) return;
     isTextMode = true;
 
-    // ẨN lời chúc + hình tạm thời
     messageContainer.classList.add("hidden-soft");
-
     generateText("Ich vermisse dich");
 
-    // pháo hoa trái tim
     setTimeout(() => heartFirework(), 800);
 
-    // đủ lâu để đọc → quay lại bình thường
     setTimeout(() => {
         isTextMode = false;
         textParticles = [];
@@ -220,6 +207,8 @@ function heartFirework() {
     const cx = canvas.width / 2;
     const cy = canvas.height * 0.4;
 
+    heartBeatCount++; // ❤️ VALENTINE EASTER EGG: đếm nhịp tim
+
     for (let i = 0; i < 120; i++) {
         const t = (i / 120) * Math.PI * 2;
         fireworks.push({
@@ -234,6 +223,35 @@ function heartFirework() {
             }]
         });
     }
+
+    // ❤️ VALENTINE EASTER EGG: hiện chữ sau nhịp thứ 14
+    if (heartBeatCount === 14 && !valentineShown) {
+        valentineShown = true;
+        showValentineText();
+    }
+}
+
+/* ❤️ VALENTINE EASTER EGG ===================== */
+function showValentineText() {
+    const text = document.createElement("div");
+    text.textContent = "happy valentine anh iu 💘";
+    text.style.position = "fixed";
+    text.style.top = "55%";
+    text.style.left = "50%";
+    text.style.transform = "translate(-50%, -50%)";
+    text.style.fontSize = "18px";
+    text.style.opacity = "0";
+    text.style.color = "#fff";
+    text.style.letterSpacing = "1px";
+    text.style.transition = "opacity 1.2s ease";
+    text.style.zIndex = "30";
+
+    document.body.appendChild(text);
+
+    requestAnimationFrame(() => (text.style.opacity = "1"));
+
+    setTimeout(() => (text.style.opacity = "0"), 2200);
+    setTimeout(() => text.remove(), 3500);
 }
 
 /* ===================== DRAW ===================== */
@@ -272,7 +290,7 @@ function createMaiRain() {
         img.style.animationDuration = 3 + Math.random() * 3 + "s";
         document.body.appendChild(img);
         setTimeout(() => img.remove(), 7000);
-    }, 180); // DÀY HƠN
+    }, 180);
 }
 
 function startFoodRain() {
@@ -285,5 +303,5 @@ function startFoodRain() {
         img.style.animationDuration = 7 + Math.random() * 4 + "s";
         document.body.appendChild(img);
         setTimeout(() => img.remove(), 14000);
-    }, 2200); // DÀY HƠN
+    }, 2200);
 }
