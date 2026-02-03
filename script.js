@@ -94,6 +94,13 @@ function startMissTextSequence() {
     generateText("Ich vermisse dich");
 
     setTimeout(() => heartFirework(), 800);
+    // ❤️ VALENTINE EASTER EGG: giả lập 14 nhịp tim
+let beatInterval = setInterval(() => {
+    heartFirework();
+    if (heartBeatCount >= 14) {
+        clearInterval(beatInterval);
+    }
+}, 280); // ~14 nhịp trong ~4s
 
     setTimeout(() => {
         isTextMode = false;
