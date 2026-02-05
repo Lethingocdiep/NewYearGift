@@ -33,8 +33,8 @@ let fireworks = [];
 let textParticles = [];
 
 /* ❤️ VALENTINE EASTER EGG ===================== */
-let heartBeatCount = 0;        // đếm nhịp pháo tim
-let valentineShown = false;   // đảm bảo chỉ hiện 1 lần
+let heartBeatCount = 0;
+let valentineShown = false;
 
 /* ===================== LOAD PAGE ===================== */
 envelopeContainer.classList.add("hidden");
@@ -90,17 +90,20 @@ function startMissTextSequence() {
     if (isTextMode) return;
     isTextMode = true;
 
+    // reset Easter Egg mỗi lần quay lại tab
+    heartBeatCount = 0;
+    valentineShown = false;
+
     messageContainer.classList.add("hidden-soft");
     generateText("Ich vermisse dich");
 
-    setTimeout(() => heartFirework(), 800);
-    // ❤️ VALENTINE EASTER EGG: giả lập 14 nhịp tim
-let beatInterval = setInterval(() => {
-    heartFirework();
-    if (heartBeatCount >= 14) {
-        clearInterval(beatInterval);
-    }
-}, 280); // ~14 nhịp trong ~4s
+    // ❤️ giả lập 14 nhịp tim trong ~4s
+    const beatInterval = setInterval(() => {
+        heartFirework();
+        if (heartBeatCount >= 14) {
+            clearInterval(beatInterval);
+        }
+    }, 280);
 
     setTimeout(() => {
         isTextMode = false;
@@ -214,7 +217,7 @@ function heartFirework() {
     const cx = canvas.width / 2;
     const cy = canvas.height * 0.4;
 
-    heartBeatCount++; // ❤️ VALENTINE EASTER EGG: đếm nhịp tim
+    heartBeatCount++;
 
     for (let i = 0; i < 120; i++) {
         const t = (i / 120) * Math.PI * 2;
@@ -231,7 +234,6 @@ function heartFirework() {
         });
     }
 
-    // ❤️ VALENTINE EASTER EGG: hiện chữ sau nhịp thứ 14
     if (heartBeatCount === 14 && !valentineShown) {
         valentineShown = true;
         showValentineText();
@@ -242,23 +244,29 @@ function heartFirework() {
 function showValentineText() {
     const text = document.createElement("div");
     text.textContent = "happy valentine anh iu 💘";
+
     text.style.position = "fixed";
-    text.style.top = "55%";
+    text.style.top = "56%";
     text.style.left = "50%";
     text.style.transform = "translate(-50%, -50%)";
-    text.style.fontSize = "18px";
+    text.style.fontSize = "22px";
+    text.style.fontWeight = "500";
+    text.style.letterSpacing = "1.5px";
+    text.style.color = "#ffd6e8";
     text.style.opacity = "0";
-    text.style.color = "#fff";
-    text.style.letterSpacing = "1px";
-    text.style.transition = "opacity 1.2s ease";
+    text.style.textShadow = `
+        0 0 6px rgba(255,105,180,.45),
+        0 0 14px rgba(255,105,180,.25)
+    `;
+    text.style.transition = "opacity 1.4s ease";
+    text.style.pointerEvents = "none";
     text.style.zIndex = "30";
 
     document.body.appendChild(text);
 
     requestAnimationFrame(() => (text.style.opacity = "1"));
-
-    setTimeout(() => (text.style.opacity = "0"), 2200);
-    setTimeout(() => text.remove(), 3500);
+    setTimeout(() => (text.style.opacity = "0"), 2600);
+    setTimeout(() => text.remove(), 4200);
 }
 
 /* ===================== DRAW ===================== */
