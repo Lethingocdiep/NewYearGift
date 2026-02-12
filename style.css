@@ -1,17 +1,20 @@
 body {
     margin: 0;
     background: #8b0000;
-    overflow: hidden;
     font-family: "Segoe UI", sans-serif;
     color: white;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100vh;
 }
 
-/* ================= TRÁI TIM ================= */
+/* Trái tim */
 #heart-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     z-index: 10;
 }
@@ -27,12 +30,13 @@ body {
     50% { transform: scale(1); }
 }
 
-/* ================= PHONG BÌ ================= */
+/* Phong bì */
 #envelope-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     z-index: 9;
 }
 
@@ -41,21 +45,22 @@ body {
     cursor: pointer;
 }
 
-/* ================= LỜI CHÚC ================= */
+/* Lời chúc */
 #message-container {
-    position: absolute;
-    top: 55%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: relative;
+    margin-top: 10vh;
     text-align: center;
     width: 90%;
     max-width: 420px;
-    line-height: 1.65;
+    line-height: 1.6;
     text-shadow: 0 0 6px rgba(255,255,255,0.4);
     z-index: 8;
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom: 30px;
 }
 
-/* ================= ẢNH ĐÔI ================= */
+/* Ảnh đôi */
 #couple-img {
     width: 100%;
     border-radius: 16px;
@@ -66,18 +71,19 @@ body {
         0 0 20px rgba(255,215,0,0.4);
 }
 
-/* ================= ẨN ================= */
+/* Ẩn cứng */
 .hidden {
     display: none;
 }
 
+/* Ẩn mềm */
 .hidden-soft {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.6s ease;
 }
 
-/* ================= CANVAS ================= */
+/* Canvas pháo hoa */
 #fireworks-canvas {
     position: fixed;
     inset: 0;
@@ -85,12 +91,13 @@ body {
     z-index: 1;
 }
 
-/* ================= HOA MAI ================= */
+/* Hoa mai */
 .mayflower {
     position: fixed;
     top: -40px;
     width: 35px;
     animation: fall linear infinite;
+    z-index: 2;
 }
 
 @keyframes fall {
@@ -99,15 +106,16 @@ body {
     }
 }
 
-/* ================= ĐỒ ĂN ================= */
+/* Đồ ăn */
 .food-floating {
     position: fixed;
     top: -50px;
     width: 50px;
     animation: fall linear;
+    z-index: 2;
 }
 
-/* ================= TEXT ICH VERMISSE DICH ================= */
+/* Text Ich vermisse dich */
 #miss-text {
     position: fixed;
     top: 45%;
@@ -118,11 +126,33 @@ body {
     letter-spacing: 2px;
     text-shadow: 0 0 12px rgba(255,255,255,0.9);
     z-index: 20;
+    max-width: 92vw;
+    text-align: center;
+    word-break: break-word;
 }
 
-/* ================= MOBILE RESPONSIVE ================= */
-@media (max-width: 768px) {
+/* Valentine Easter Egg */
+.valentine-text {
+    position: fixed;
+    top: 56%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    color: #ffd6e8;
+    text-shadow:
+        0 0 6px rgba(255,105,180,.45),
+        0 0 14px rgba(255,105,180,.25);
+    max-width: 92vw;
+    text-align: center;
+    word-break: break-word;
+    pointer-events: none;
+    z-index: 30;
+}
 
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
     #heart {
         width: 135px;
         animation: heartbeat 0.85s infinite;
@@ -133,17 +163,18 @@ body {
     }
 
     #message-container {
-        top: 56%;
-        font-size: 15.5px;
-        padding: 0 10px;
-        line-height: 1.65;
+        margin-top: 7vh;
+        font-size: 15px;
+        padding: 0 10px 30px;
     }
 
     #miss-text {
         font-size: 22px;
         letter-spacing: 1px;
-        width: 90vw;
-        text-align: center;
+    }
+
+    .valentine-text {
+        font-size: 18px;
     }
 
     #couple-img {
@@ -163,4 +194,4 @@ body {
         width: 100vw !important;
         height: 100vh !important;
     }
-}
+                      }
