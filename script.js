@@ -15,32 +15,31 @@ const popSound = document.getElementById("popSound");
 const fireworkSound = document.getElementById("fireworksSound");
 
 /* ===================== CANVAS ===================== */
-canvas.width = innerWidth;
-canvas.height = innerHeight;
-window.addEventListener("resize", () => {
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
-});
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
 /* ===================== STATE ===================== */
 let giftStarted = false;
 let envelopeOpened = false;
 let fireworksActive = false;
-let isTabActive = true;
 let isTextMode = false;
 
 let fireworks = [];
 let textParticles = [];
 
-/* ❤️ VALENTINE EASTER EGG ===================== */
+/* ❤️ VALENTINE ===================== */
 let heartBeatCount = 0;
 let valentineShown = false;
 
-/* ===================== LOAD PAGE ===================== */
+/* ===================== LOAD ===================== */
 envelopeContainer.classList.add("hidden");
 messageContainer.classList.add("hidden");
 
-/* ===================== CLICK HEART ===================== */
+/* ===================== HEART CLICK ===================== */
 heartContainer.addEventListener("click", () => {
     if (giftStarted) return;
     giftStarted = true;
@@ -56,7 +55,7 @@ heartContainer.addEventListener("click", () => {
     backgroundMusic.play().catch(() => {});
 });
 
-/* ===================== CLICK ENVELOPE ===================== */
+/* ===================== ENVELOPE CLICK ===================== */
 envelope.addEventListener("click", () => {
     if (envelopeOpened) return;
     envelopeOpened = true;
@@ -68,41 +67,33 @@ envelope.addEventListener("click", () => {
     popSound.play().catch(() => {});
 
     fireworksActive = true;
+
+    startMissTextSequence();
 });
 
-/* ===================== TAB VISIBILITY ===================== */
+/* ===================== TAB CHANGE ===================== */
 document.addEventListener("visibilitychange", () => {
-    isTabActive = !document.hidden;
-
     if (!envelopeOpened) return;
 
-    if (!isTabActive) {
-        fireworksActive = false;
-        isTextMode = false;
-    } else {
-        rainFireworksDown();
+    if (!document.hidden) {
         startMissTextSequence();
     }
 });
 
-/* ===================== MISS TEXT SEQUENCE ===================== */
+/* ===================== TEXT SEQUENCE ===================== */
 function startMissTextSequence() {
     if (isTextMode) return;
     isTextMode = true;
 
-    // reset Easter Egg mỗi lần quay lại tab
     heartBeatCount = 0;
     valentineShown = false;
 
     messageContainer.classList.add("hidden-soft");
     generateText("Ich vermisse dich");
 
-    // ❤️ giả lập 14 nhịp tim trong ~4s
     const beatInterval = setInterval(() => {
         heartFirework();
-        if (heartBeatCount >= 14) {
-            clearInterval(beatInterval);
-        }
+        if (heartBeatCount >= 14) clearInterval(beatInterval);
     }, 280);
 
     setTimeout(() => {
@@ -113,12 +104,12 @@ function startMissTextSequence() {
     }, 4200);
 }
 
-/* ===================== FIREWORK ENGINE ===================== */
+/* ===================== FIREWORK ===================== */
 function spawnFirework() {
     fireworks.push({
         x: Math.random() * canvas.width,
         y: canvas.height,
-        targetY: canvas.height * (0.25 + Math.random() * 0.25),
+        targetY: canvas.height * (0.25 + Math.random() * 0.3),
         vy: 6,
         exploded: false,
         particles: []
@@ -167,15 +158,6 @@ function updateFireworks() {
     });
 }
 
-/* ===================== TAB RETURN RAIN ===================== */
-function rainFireworksDown() {
-    fireworks.forEach(fw => {
-        if (!fw.exploded) fw.vy = -8;
-    });
-    fireworkSound.currentTime = 0;
-    fireworkSound.play().catch(() => {});
-}
-
 /* ===================== TEXT PARTICLES ===================== */
 function generateText(text) {
     const off = document.createElement("canvas");
@@ -183,7 +165,8 @@ function generateText(text) {
     off.height = 200;
     const c = off.getContext("2d");
 
-    c.font = "900 120px Segoe UI";
+    let fontSize = Math.min(canvas.width * 0.15, 100);
+    c.font = `900 ${fontSize}px Segoe UI`;
     c.textAlign = "center";
     c.fillStyle = "#fff";
     c.fillText(text, off.width / 2, 140);
@@ -240,27 +223,11 @@ function heartFirework() {
     }
 }
 
-/* ❤️ VALENTINE EASTER EGG ===================== */
+/* ❤️ VALENTINE TEXT ===================== */
 function showValentineText() {
     const text = document.createElement("div");
+    text.className = "valentine-text";
     text.textContent = "happy valentine anh iu 💘";
-
-    text.style.position = "fixed";
-    text.style.top = "56%";
-    text.style.left = "50%";
-    text.style.transform = "translate(-50%, -50%)";
-    text.style.fontSize = "22px";
-    text.style.fontWeight = "500";
-    text.style.letterSpacing = "1.5px";
-    text.style.color = "#ffd6e8";
-    text.style.opacity = "0";
-    text.style.textShadow = `
-        0 0 6px rgba(255,105,180,.45),
-        0 0 14px rgba(255,105,180,.25)
-    `;
-    text.style.transition = "opacity 1.4s ease";
-    text.style.pointerEvents = "none";
-    text.style.zIndex = "30";
 
     document.body.appendChild(text);
 
@@ -281,9 +248,7 @@ function drawDot(x, y, color) {
 }
 
 function randomColor() {
-    return ["#ff4d4d", "#ffd700", "#ff66cc", "#ffffff"][
-        Math.floor(Math.random() * 4)
-    ];
+    return ["#ff4d4d", "#ffd700", "#ff66cc", "#ffffff"][Math.floor(Math.random() * 4)];
 }
 
 /* ===================== LOOP ===================== */
@@ -295,7 +260,7 @@ function animate() {
 }
 animate();
 
-/* ===================== MAI + FOOD RAIN ===================== */
+/* ===================== MAI + FOOD ===================== */
 function createMaiRain() {
     setInterval(() => {
         const img = document.createElement("img");
@@ -305,7 +270,7 @@ function createMaiRain() {
         img.style.animationDuration = 3 + Math.random() * 3 + "s";
         document.body.appendChild(img);
         setTimeout(() => img.remove(), 7000);
-    }, 180);
+    }, 200);
 }
 
 function startFoodRain() {
