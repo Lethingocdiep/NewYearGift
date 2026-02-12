@@ -6,7 +6,7 @@ body {
     color: white;
 }
 
-/* Trái tim */
+/* ================= TRÁI TIM ================= */
 #heart-container {
     position: absolute;
     top: 50%;
@@ -27,7 +27,7 @@ body {
     50% { transform: scale(1); }
 }
 
-/* Phong bì */
+/* ================= PHONG BÌ ================= */
 #envelope-container {
     position: absolute;
     top: 50%;
@@ -41,7 +41,7 @@ body {
     cursor: pointer;
 }
 
-/* Lời chúc */
+/* ================= LỜI CHÚC ================= */
 #message-container {
     position: absolute;
     top: 55%;
@@ -50,12 +50,12 @@ body {
     text-align: center;
     width: 90%;
     max-width: 420px;
-    line-height: 1.6;
+    line-height: 1.65;
     text-shadow: 0 0 6px rgba(255,255,255,0.4);
     z-index: 8;
 }
 
-/* Ảnh đôi */
+/* ================= ẢNH ĐÔI ================= */
 #couple-img {
     width: 100%;
     border-radius: 16px;
@@ -66,19 +66,18 @@ body {
         0 0 20px rgba(255,215,0,0.4);
 }
 
-/* Ẩn cứng */
+/* ================= ẨN ================= */
 .hidden {
     display: none;
 }
 
-/* Ẩn mềm */
 .hidden-soft {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.6s ease;
 }
 
-/* Canvas pháo hoa */
+/* ================= CANVAS ================= */
 #fireworks-canvas {
     position: fixed;
     inset: 0;
@@ -86,7 +85,7 @@ body {
     z-index: 1;
 }
 
-/* Hoa mai */
+/* ================= HOA MAI ================= */
 .mayflower {
     position: fixed;
     top: -40px;
@@ -100,7 +99,7 @@ body {
     }
 }
 
-/* Đồ ăn */
+/* ================= ĐỒ ĂN ================= */
 .food-floating {
     position: fixed;
     top: -50px;
@@ -108,7 +107,7 @@ body {
     animation: fall linear;
 }
 
-/* Text Ich vermisse dich */
+/* ================= TEXT ICH VERMISSE DICH ================= */
 #miss-text {
     position: fixed;
     top: 45%;
@@ -119,4 +118,49 @@ body {
     letter-spacing: 2px;
     text-shadow: 0 0 12px rgba(255,255,255,0.9);
     z-index: 20;
+}
+
+/* ================= MOBILE RESPONSIVE ================= */
+@media (max-width: 768px) {
+
+    #heart {
+        width: 135px;
+        animation: heartbeat 0.85s infinite;
+    }
+
+    #envelope {
+        width: 170px;
+    }
+
+    #message-container {
+        top: 56%;
+        font-size: 15.5px;
+        padding: 0 10px;
+        line-height: 1.65;
+    }
+
+    #miss-text {
+        font-size: 22px;
+        letter-spacing: 1px;
+        width: 90vw;
+        text-align: center;
+    }
+
+    #couple-img {
+        border-radius: 12px;
+        margin-top: 10px;
+    }
+
+    .mayflower {
+        width: 24px;
+    }
+
+    .food-floating {
+        width: 32px;
+    }
+
+    canvas {
+        width: 100vw !important;
+        height: 100vh !important;
+    }
 }
