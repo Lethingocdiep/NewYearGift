@@ -51,20 +51,20 @@ body {
     width: 92%;
     max-width: 420px;
 
-    max-height: 88vh;
+    max-height: 90vh;
     overflow: hidden;
 
     text-align: center;
     line-height: 1.55;
     text-shadow: 0 0 6px rgba(255,255,255,0.4);
 
-    display: none;   /* 👈 CỰC KỲ QUAN TRỌNG */
-
-    flex-direction: column;
-    justify-content: space-between;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.6s ease;
 
     z-index: 8;
 }
+
 #greeting {
     font-size: 15.5px;
     margin: 0 0 12px;
@@ -73,22 +73,24 @@ body {
 /* ================= ẢNH ĐÔI ================= */
 #couple-img {
     width: 100%;
-    max-height: 28vh;
+    max-height: 38vh;
     object-fit: contain;
 
-    border-radius: 18px;
-    margin-top: 10px;
+    border-radius: 16px;
+    margin-top: 12px;
 
     border: 2px solid gold;
     box-shadow:
         0 0 12px rgba(255,215,0,0.7),
-        0 0 24px rgba(255,215,0,0.45),
-        0 0 36px rgba(255,215,0,0.25);
+        0 0 22px rgba(255,215,0,0.45),
+        /*0 0 36px rgba(255,215,0,0.25); */
 }
 
 /* ================= ẨN ================= */
 .hidden {
-    display: none;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
 }
 
 .hidden-soft {
