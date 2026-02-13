@@ -1,323 +1,172 @@
-
-/* ===================== DOM ===================== */
-const heartContainer = document.getElementById("heart-container");
-const heart = document.getElementById("heart");
-
-const envelopeContainer = document.getElementById("envelope-container");
-const envelope = document.getElementById("envelope");
-
-const messageContainer = document.getElementById("message-container");
-
 const canvas = document.getElementById("fireworks-canvas");
 const ctx = canvas.getContext("2d");
-
-const backgroundMusic = document.getElementById("backgroundMusic");
-const popSound = document.getElementById("popSound");
+const heartContainer = document.getElementById("heart-container");
+const envelopeContainer = document.getElementById("envelope-container");
+const messageContainer = document.getElementById("message-container");
+const bgMusic = document.getElementById("backgroundMusic");
 const fireworkSound = document.getElementById("fireworksSound");
+const popSound = document.getElementById("popSound");
 
-/* ===================== CANVAS ===================== */
-canvas.width = innerWidth;
-canvas.height = innerHeight;
-window.addEventListener("resize", () => {
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
-});
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-/* ===================== STATE ===================== */
-let giftStarted = false;
-let envelopeOpened = false;
-let fireworksActive = false;
+let particles = [];
 let isTabActive = true;
-let isTextMode = false;
+let currentState = "START"; 
+let isEasterEggRunning = false;
+const colors = ["#ff4d4d", "#ffd700", "#4dff4d", "#4dffff", "#ff4dff", "#ffffff", "#ff85a2"];
 
-let fireworks = [];
-let textParticles = [];
+// HÀM PHÁT TIẾNG PHÁO (Đồng bộ hóa)
+function playFireworkSFX(volume = 0.5) {
+    if (fireworkSound) {
+        const sound = fireworkSound.cloneNode(); // Tạo bản sao để nổ nhiều tiếng cùng lúc
+        sound.volume = volume;
+        sound.play().catch(() => {}); // Tránh lỗi trình duyệt chặn
+    }
+}
 
-/* ❤️ VALENTINE EASTER EGG ===================== */
-let heartBeatCount = 0;
-let valentineShown = false;
-
-/* ===================== LOAD PAGE ===================== */
-envelopeContainer.classList.add("hidden");
-messageContainer.classList.add("hidden");
-
-/* ===================== CLICK HEART ===================== */
+// 1. Click Tim -> Mồi âm thanh
 heartContainer.addEventListener("click", () => {
-    if (giftStarted) return;
-    giftStarted = true;
-
     heartContainer.classList.add("hidden");
     envelopeContainer.classList.remove("hidden");
+    
+    // Phát nhạc nền và mồi file pháo hoa để trình duyệt cấp quyền
+    bgMusic.play().catch(() => {});
+    fireworkSound.play().then(() => {
+        fireworkSound.pause();
+        fireworkSound.currentTime = 0;
+    }).catch(() => {});
 
-    createMaiRain();
-    startFoodRain();
-
-    backgroundMusic.loop = true;
-    backgroundMusic.volume = 0.35;
-    backgroundMusic.play().catch(() => {});
+    startRain(); 
 });
 
-/* ===================== CLICK ENVELOPE ===================== */
-envelope.addEventListener("click", () => {
-    if (envelopeOpened) return;
-    envelopeOpened = true;
-
+// 2. Click Phong bì
+document.getElementById("envelope").addEventListener("click", () => {
     envelopeContainer.classList.add("hidden");
     messageContainer.classList.remove("hidden");
-
-    popSound.currentTime = 0;
-    popSound.play().catch(() => {});
-
-    fireworksActive = true;
+    if(popSound) popSound.play();
+    currentState = "WISHES";
 });
 
-/* ===================== TAB VISIBILITY ===================== */
+// 3. Tab Visibility
 document.addEventListener("visibilitychange", () => {
     isTabActive = !document.hidden;
-
-    if (!envelopeOpened) return;
-
-    if (!isTabActive) {
-        fireworksActive = false;
-        isTextMode = false;
-    } else {
-        rainFireworksDown();
-        startMissTextSequence();
+    if (isTabActive && currentState === "WISHES" && !isEasterEggRunning) {
+        runEasterEggFlow();
     }
 });
 
-/* ===================== MISS TEXT SEQUENCE ===================== */
-function startMissTextSequence() {
-    if (isTextMode) return;
-    isTextMode = true;
-
-    // reset Easter Egg mỗi lần quay lại tab
-    heartBeatCount = 0;
-    valentineShown = false;
-
-    messageContainer.classList.add("hidden-soft");
-    generateText("Ich vermisse dich");
-
-    // ❤️ giả lập 14 nhịp tim trong ~4s
-    const beatInterval = setInterval(() => {
-        heartFirework();
-        if (heartBeatCount >= 14) {
-            clearInterval(beatInterval);
-        }
-    }, 280);
-
+// 4. Easter Egg
+function runEasterEggFlow() {
+    isEasterEggRunning = true;
+    const innerMsg = document.getElementById("inner-message");
+    const eggContainer = document.getElementById("easter-egg-container");
+    
+    if(innerMsg) innerMsg.style.opacity = "0.05";
+    eggContainer.innerHTML = `<p class="easter-text">Ich vermisse dich</p>`;
+    
     setTimeout(() => {
-        isTextMode = false;
-        textParticles = [];
-        messageContainer.classList.remove("hidden-soft");
-        fireworksActive = true;
-    }, 4200);
-}
-
-/* ===================== FIREWORK ENGINE ===================== */
-function spawnFirework() {
-    fireworks.push({
-        x: Math.random() * canvas.width,
-        y: canvas.height,
-        targetY: canvas.height * (0.25 + Math.random() * 0.25),
-        vy: 6,
-        exploded: false,
-        particles: []
-    });
-}
-
-function updateFireworks() {
-    if (fireworksActive && !isTextMode && Math.random() < 0.05) {
-        spawnFirework();
-    }
-
-    fireworks.forEach((fw, i) => {
-        if (!fw.exploded) {
-            fw.y -= fw.vy;
-            drawDot(fw.x, fw.y, "#fff");
-
-            if (fw.y <= fw.targetY) {
-                fw.exploded = true;
-                fireworkSound.currentTime = 0;
-                fireworkSound.play().catch(() => {});
-
-                for (let p = 0; p < 45; p++) {
-                    fw.particles.push({
-                        x: fw.x,
-                        y: fw.y,
-                        vx: Math.cos(Math.random() * Math.PI * 2) * 3,
-                        vy: Math.sin(Math.random() * Math.PI * 2) * 3,
-                        life: 50,
-                        color: randomColor()
-                    });
-                }
+        let count = 0;
+        const interval = setInterval(() => {
+            spawnHeartFirework();
+            count++;
+            if (count >= 14) {
+                clearInterval(interval);
+                eggContainer.innerHTML = `<p class="easter-text" style="color:#ff4d6d">Happy valentine anh iu 💘</p>`;
+                setTimeout(() => {
+                    eggContainer.innerHTML = "";
+                    if(innerMsg) innerMsg.style.opacity = "1";
+                    isEasterEggRunning = false;
+                }, 3500);
             }
+        }, 700);
+    }, 2000);
+}
+
+// 5. Engine Pháo hoa
+class Particle {
+    constructor(x, y, color, vx, vy) {
+        this.x = x; this.y = y;
+        this.color = color;
+        this.vx = vx; this.vy = vy;
+        this.alpha = 1;
+    }
+    update() {
+        if (!isTabActive) {
+            this.vx += (canvas.width/2 - this.x) * 0.02;
+            this.vy += (canvas.height/2 - this.y) * 0.02;
         } else {
-            fw.particles.forEach(pt => {
-                pt.x += pt.vx;
-                pt.y += pt.vy;
-                pt.life--;
-                drawDot(pt.x, pt.y, pt.color);
-            });
-            fw.particles = fw.particles.filter(p => p.life > 0);
+            this.vx *= 0.97; this.vy *= 0.97;
+            this.vy += 0.06;
         }
-
-        if (fw.exploded && fw.particles.length === 0) {
-            fireworks.splice(i, 1);
-        }
-    });
-}
-
-/* ===================== TAB RETURN RAIN ===================== */
-function rainFireworksDown() {
-    fireworks.forEach(fw => {
-        if (!fw.exploded) fw.vy = -8;
-    });
-    fireworkSound.currentTime = 0;
-    fireworkSound.play().catch(() => {});
-}
-
-/* ===================== TEXT PARTICLES ===================== */
-function generateText(text) {
-    const off = document.createElement("canvas");
-    off.width = canvas.width;
-    off.height = 200;
-    const c = off.getContext("2d");
-
-    c.font = "900 120px Segoe UI";
-    c.textAlign = "center";
-    c.fillStyle = "#fff";
-    c.fillText(text, off.width / 2, 140);
-
-    const data = c.getImageData(0, 0, off.width, off.height).data;
-    textParticles = [];
-
-    for (let y = 0; y < off.height; y += 3) {
-        for (let x = 0; x < off.width; x += 3) {
-            if (data[(y * off.width + x) * 4 + 3] > 150) {
-                textParticles.push({
-                    x,
-                    y: y + canvas.height * 0.35,
-                    life: 200
-                });
-            }
-        }
+        this.x += this.vx; this.y += this.vy;
+        this.alpha -= 0.012;
+    }
+    draw() {
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
     }
 }
 
-function drawTextParticles() {
-    textParticles.forEach(p => {
-        drawDot(p.x, p.y, "#fff");
-        p.life--;
-    });
-    textParticles = textParticles.filter(p => p.life > 0);
-}
-
-/* ===================== HEART FIREWORK ===================== */
-function heartFirework() {
+// Pháo hoa hình tim (Valentine)
+function spawnHeartFirework() {
     const cx = canvas.width / 2;
-    const cy = canvas.height * 0.4;
+    const cy = canvas.height * 0.45;
+    
+    // ĐỒNG BỘ: Phát tiếng nổ ngay khi các hạt bắt đầu được tạo
+    playFireworkSFX(0.6);
 
-    heartBeatCount++;
-
-    for (let i = 0; i < 120; i++) {
-        const t = (i / 120) * Math.PI * 2;
-        fireworks.push({
-            exploded: true,
-            particles: [{
-                x: cx,
-                y: cy,
-                vx: Math.cos(t) * 4,
-                vy: Math.sin(t) * 4,
-                life: 40,
-                color: i % 2 ? "#ff66cc" : "#fff"
-            }]
-        });
-    }
-
-    if (heartBeatCount === 14 && !valentineShown) {
-        valentineShown = true;
-        showValentineText();
+    for (let i = 0; i < 70; i++) {
+        const angle = (i / 70) * Math.PI * 2;
+        const vx = 16 * Math.pow(Math.sin(angle), 3) * 0.38;
+        const vy = -(13 * Math.cos(angle) - 5 * Math.cos(2*angle) - 2 * Math.cos(3*angle) - Math.cos(4*angle)) * 0.38;
+        particles.push(new Particle(cx, cy, "#ff69b4", vx, vy));
     }
 }
 
-/* ❤️ VALENTINE EASTER EGG ===================== */
-function showValentineText() {
-    const text = document.createElement("div");
-    text.textContent = "happy valentine anh iu 💘";
-
-    text.style.position = "fixed";
-    text.style.top = "56%";
-    text.style.left = "50%";
-    text.style.transform = "translate(-50%, -50%)";
-    text.style.fontSize = "22px";
-    text.style.fontWeight = "500";
-    text.style.letterSpacing = "1.5px";
-    text.style.color = "#ffd6e8";
-    text.style.opacity = "0";
-    text.style.textShadow = `
-        0 0 6px rgba(255,105,180,.45),
-        0 0 14px rgba(255,105,180,.25)
-    `;
-    text.style.transition = "opacity 1.4s ease";
-    text.style.pointerEvents = "none";
-    text.style.zIndex = "30";
-
-    document.body.appendChild(text);
-
-    requestAnimationFrame(() => (text.style.opacity = "1"));
-    setTimeout(() => (text.style.opacity = "0"), 2600);
-    setTimeout(() => text.remove(), 4200);
-}
-
-/* ===================== DRAW ===================== */
-function drawDot(x, y, color) {
-    ctx.beginPath();
-    ctx.arc(x, y, 3.5, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.shadowBlur = 6;
-    ctx.shadowColor = color;
-    ctx.fill();
-    ctx.shadowBlur = 0;
-}
-
-function randomColor() {
-    return ["#ff4d4d", "#ffd700", "#ff66cc", "#ffffff"][
-        Math.floor(Math.random() * 4)
-    ];
-}
-
-/* ===================== LOOP ===================== */
 function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    updateFireworks();
-    if (isTextMode) drawTextParticles();
+    ctx.fillStyle = "rgba(139, 0, 0, 0.2)"; 
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Pháo hoa ngẫu nhiên (Tết)
+    if (isTabActive && currentState === "WISHES" && Math.random() < 0.06 && !isEasterEggRunning) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * (canvas.height * 0.4);
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        
+        // ĐỒNG BỘ: Phát tiếng nổ nhẹ hơn cho pháo hoa nền
+        playFireworkSFX(0.3);
+
+        for(let i=0; i<35; i++) {
+            particles.push(new Particle(x, y, color, (Math.random()-0.5)*11, (Math.random()-0.5)*11));
+        }
+    }
+
+    particles.forEach((p, i) => {
+        p.update(); p.draw();
+        if (p.alpha <= 0) particles.splice(i, 1);
+    });
     requestAnimationFrame(animate);
 }
 animate();
 
-/* ===================== MAI + FOOD RAIN ===================== */
-function createMaiRain() {
+// 6. Hiệu ứng rơi (Vừa phải)
+function startRain() {
     setInterval(() => {
         const img = document.createElement("img");
-        img.src = "images/mai.png";
-        img.className = "mayflower";
+        const type = Math.random();
+        if (type < 0.7) { 
+            img.src = "images/mai.png"; img.className = "mayflower"; img.style.width = "20px";
+        } else {
+            img.src = type < 0.85 ? "images/thit_kho.png" : "images/banh_tet.png";
+            img.className = "food-floating"; img.style.width = "38px";
+        }
         img.style.left = Math.random() * 100 + "vw";
-        img.style.animationDuration = 3 + Math.random() * 3 + "s";
+        img.style.animationDuration = (Math.random() * 3 + 4) + "s";
         document.body.appendChild(img);
-        setTimeout(() => img.remove(), 7000);
-    }, 180);
-}
-
-function startFoodRain() {
-    const foods = ["thit_kho.png", "banh_tet.png"];
-    setInterval(() => {
-        const img = document.createElement("img");
-        img.src = "images/" + foods[Math.floor(Math.random() * foods.length)];
-        img.className = "food-floating";
-        img.style.left = Math.random() * 100 + "vw";
-        img.style.animationDuration = 7 + Math.random() * 4 + "s";
-        document.body.appendChild(img);
-        setTimeout(() => img.remove(), 14000);
-    }, 2200);
+        setTimeout(() => img.remove(), 6500);
+    }, 380); 
 }
