@@ -16,7 +16,6 @@ let currentState = "START";
 let isEasterEggRunning = false;
 const colors = ["#ff4d4d", "#ffd700", "#4dff4d", "#4dffff", "#ff4dff", "#ffffff", "#ff85a2"];
 
-// Phát âm thanh đồng bộ
 function playFireworkSFX(volume = 0.5) {
     if (fireworkSound) {
         const sound = fireworkSound.cloneNode();
@@ -42,7 +41,7 @@ document.getElementById("envelope").addEventListener("click", () => {
     currentState = "WISHES";
 });
 
-// 3. Xử lý quay lại Tab (Kích hoạt Easter Egg)
+// 3. Xử lý Easter Egg
 document.addEventListener("visibilitychange", () => {
     isTabActive = !document.hidden;
     if (isTabActive && currentState === "WISHES" && !isEasterEggRunning) {
@@ -50,40 +49,38 @@ document.addEventListener("visibilitychange", () => {
     }
 });
 
-// 4. Easter Egg Flow chuẩn của bạn
 function runEasterEggFlow() {
     isEasterEggRunning = true;
     const innerMsg = document.getElementById("inner-message");
     const eggContainer = document.getElementById("easter-egg-container");
     
-    // BƯỚC 1: Làm mờ lời chúc cũ ngay lập tức
-    if(innerMsg) innerMsg.style.opacity = "0.05";
+    // Làm mờ cực sâu để chữ lấp lánh hiện rõ
+    if(innerMsg) innerMsg.style.opacity = "0.02";
     
-    // BƯỚC 2: Hiện chữ "Ich vermisse dich" ngay khi quay lại
+    // HIỆN CHỮ VÀ BẮT ĐẦU BẮN TIM ĐỒNG THỜI
     eggContainer.innerHTML = `<p class="easter-text">Ich vermisse dich</p>`;
     
     let count = 0;
-    // BƯỚC 3: Chạy vòng lặp 14 nhịp tim (Bắt đầu ngay lập tức)
     const interval = setInterval(() => {
-        spawnHeartFirework(); // Mỗi lần gọi là 1 pháo hoa tim nổ + tiếng sfx
+        spawnHeartFirework();
         count++;
         
         if (count >= 14) {
             clearInterval(interval);
             
-            // BƯỚC 4: Sau khi đếm đủ 14 nhịp, đổi sang Happy Valentine
+            // Chờ một chút sau 14 nhịp tim rồi đổi lời chúc
             setTimeout(() => {
                 eggContainer.innerHTML = `<p class="easter-text" style="color:#ff4d6d">happy valentine anh iu 💘</p>`;
-            }, 500);
+            }, 600);
 
-            // Kết thúc và trả lại màn hình chính sau 4 giây
+            // Trả lại màn hình gốc
             setTimeout(() => {
                 eggContainer.innerHTML = "";
                 if(innerMsg) innerMsg.style.opacity = "1";
                 isEasterEggRunning = false;
             }, 4500);
         }
-    }, 700); // Nhịp tim đập 0.7 giây một lần
+    }, 800); 
 }
 
 // 5. Engine Pháo hoa
@@ -108,7 +105,7 @@ class Particle {
     draw() {
         ctx.globalAlpha = this.alpha;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, 2.2, 0, Math.PI * 2);
         ctx.fillStyle = this.color;
         ctx.fill();
     }
@@ -117,8 +114,6 @@ class Particle {
 function spawnHeartFirework() {
     const cx = canvas.width / 2;
     const cy = canvas.height * 0.45;
-    
-    // Tiếng nổ pháo hoa đồng bộ
     playFireworkSFX(0.6);
 
     for (let i = 0; i < 75; i++) {
@@ -133,7 +128,6 @@ function animate() {
     ctx.fillStyle = "rgba(139, 0, 0, 0.2)"; 
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Pháo hoa Tết ngẫu nhiên (chỉ nổ khi KHÔNG chạy Easter Egg)
     if (isTabActive && currentState === "WISHES" && Math.random() < 0.06 && !isEasterEggRunning) {
         const x = Math.random() * canvas.width;
         const y = Math.random() * (canvas.height * 0.4);
@@ -152,7 +146,7 @@ function animate() {
 }
 animate();
 
-// 6. Hoa rơi nhẹ nhàng
+// 6. Hiệu ứng rơi (Vừa phải)
 function startRain() {
     setInterval(() => {
         const img = document.createElement("img");
