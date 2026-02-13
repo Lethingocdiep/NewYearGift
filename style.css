@@ -1,24 +1,22 @@
 body {
     margin: 0;
     background: #8b0000;
-    overflow-x: hidden;
+    overflow: hidden;
     font-family: "Segoe UI", sans-serif;
     color: white;
 }
 
-/* Trái tim */
+/* ================= TRÁI TIM ================= */
 #heart-container {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     cursor: pointer;
-    z-index: 20;
 }
 
 #heart {
-    width: 180px;
+    width: 200px;
     animation: heartbeat 1s infinite;
 }
 
@@ -28,43 +26,36 @@ body {
     50% { transform: scale(1); }
 }
 
-/* Phong bì */
+/* ================= PHONG BAO ================= */
 #envelope-container {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 18;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 #envelope {
-    width: 200px;
+    width: 230px;
+    cursor: pointer;
 }
 
-/* Message */
+/* ================= LỜI CHÚC + ẢNH ================= */
 #message-container {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    position: absolute;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     text-align: center;
-    padding: 18px;
-    z-index: 15;
-}
-
-#message-container p {
+    width: 90%;
     max-width: 420px;
     line-height: 1.6;
-    text-shadow: 0 0 6px rgba(255,255,255,.45);
+    text-shadow: 0 0 6px rgba(255,255,255,0.4);
+    transition: opacity 0.6s ease;
+    z-index: 10;
 }
 
-/* Ảnh đôi */
 #couple-img {
     width: 100%;
-    max-width: 360px;
     border-radius: 16px;
     margin-top: 12px;
     border: 2px solid gold;
@@ -73,7 +64,7 @@ body {
         0 0 20px rgba(255,215,0,0.4);
 }
 
-/* Ẩn */
+/* ================= ẨN ================= */
 .hidden {
     display: none;
 }
@@ -81,10 +72,29 @@ body {
 .hidden-soft {
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.6s ease;
 }
 
-/* Canvas pháo hoa */
+/* ================= CHỮ ICH VERMISSE DICH ================= */
+#miss-text {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 44px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: #fff;
+    opacity: 0;
+    z-index: 999;
+    pointer-events: none;
+    text-shadow:
+        0 0 10px rgba(255,255,255,1),
+        0 0 25px rgba(255,180,200,1),
+        0 0 45px rgba(255,120,160,1);
+    transition: opacity 0.8s ease;
+}
+
+/* ================= CANVAS PHÁO HOA ================= */
 #fireworks-canvas {
     position: fixed;
     inset: 0;
@@ -92,22 +102,12 @@ body {
     z-index: 5;
 }
 
-/* Hoa mai */
+/* ================= HOA MAI ================= */
 .mayflower {
     position: fixed;
     top: -40px;
-    width: 32px;
+    width: 35px;
     animation: fall linear infinite;
-    z-index: 3;
-}
-
-/* Đồ ăn */
-.food-floating {
-    position: fixed;
-    top: -50px;
-    width: 42px;
-    animation: fall linear;
-    z-index: 3;
 }
 
 @keyframes fall {
@@ -116,9 +116,16 @@ body {
     }
 }
 
-/* Mobile */
-@media (max-width: 768px) {
-    #heart { width: 130px; }
-    #envelope { width: 150px; }
-    #message-container p { font-size: 15px; }
+/* ================= ĐỒ ĂN ================= */
+.food-floating {
+    position: fixed;
+    top: -50px;
+    width: 50px;
+    animation: fall linear;
+    animation-iteration-count: 1;
+}
+
+/* ================= HIỆN CHỮ TEXT ================= */
+.text-active {
+    opacity: 1 !important;
 }
