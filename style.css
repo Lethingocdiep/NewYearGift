@@ -11,12 +11,10 @@ body {
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     z-index: 100;
-    text-align: center;
 }
 
 #heart { width: 170px; animation: heartbeat 1.2s infinite ease-in-out; cursor: pointer; }
-#envelope { width: 210px; cursor: pointer; transition: 0.3s; }
-#envelope:hover { transform: scale(1.05); }
+#envelope { width: 210px; cursor: pointer; }
 
 @keyframes heartbeat {
     0%, 100% { transform: scale(1); }
@@ -25,7 +23,7 @@ body {
 
 #message-container {
     position: relative;
-    margin: 60px auto;
+    margin: 40px auto;
     padding: 20px;
     text-align: center;
     width: 88%;
@@ -48,6 +46,21 @@ body {
     to { box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 10px #fff; }
 }
 
+/* DÒNG CHỮ EASTER EGG MỀM MẠI */
+.easter-text {
+    font-family: 'Dancing Script', cursive;
+    font-size: 48px;
+    color: #ffb6c1;
+    text-shadow: 0 0 15px #ff69b4, 0 0 30px #ff1493;
+    text-align: center;
+    animation: soft-fade 2s ease-out forwards;
+}
+
+@keyframes soft-fade {
+    from { opacity: 0; transform: scale(0.9); filter: blur(8px); }
+    to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
 .mayflower, .food-floating {
     position: fixed;
     top: -50px;
@@ -61,6 +74,5 @@ body {
 }
 
 #fireworks-canvas { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
-#easter-egg-container { position: fixed; top: 42%; left: 50%; transform: translate(-50%, -50%); z-index: 200; }
-.easter-text { font-size: 30px; font-weight: bold; text-shadow: 0 0 15px #ff69b4; text-align: center; }
+#easter-egg-container { position: fixed; top: 42%; left: 50%; transform: translate(-50%, -50%); z-index: 200; width: 100%; }
 .hidden { display: none !important; }
