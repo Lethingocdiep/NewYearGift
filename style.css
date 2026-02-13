@@ -1,11 +1,9 @@
 body {
     margin: 0;
     background: #8b0000;
+    overflow-x: hidden;
     font-family: "Segoe UI", sans-serif;
     color: white;
-    overflow-x: hidden;
-    overflow-y: auto;
-    min-height: 100vh;
 }
 
 /* Trái tim */
@@ -13,14 +11,14 @@ body {
     position: fixed;
     inset: 0;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     cursor: pointer;
-    z-index: 10;
+    z-index: 20;
 }
 
 #heart {
-    width: 200px;
+    width: 180px;
     animation: heartbeat 1s infinite;
 }
 
@@ -35,34 +33,38 @@ body {
     position: fixed;
     inset: 0;
     display: flex;
-    align-items: center;
     justify-content: center;
-    z-index: 9;
+    align-items: center;
+    z-index: 18;
 }
 
 #envelope {
-    width: 230px;
-    cursor: pointer;
+    width: 200px;
 }
 
-/* Lời chúc */
+/* Message */
 #message-container {
-    position: relative;
-    margin-top: 10vh;
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     text-align: center;
-    width: 90%;
+    padding: 18px;
+    z-index: 15;
+}
+
+#message-container p {
     max-width: 420px;
     line-height: 1.6;
-    text-shadow: 0 0 6px rgba(255,255,255,0.4);
-    z-index: 8;
-    margin-left: auto;
-    margin-right: auto;
-    padding-bottom: 30px;
+    text-shadow: 0 0 6px rgba(255,255,255,.45);
 }
 
 /* Ảnh đôi */
 #couple-img {
     width: 100%;
+    max-width: 360px;
     border-radius: 16px;
     margin-top: 12px;
     border: 2px solid gold;
@@ -71,12 +73,11 @@ body {
         0 0 20px rgba(255,215,0,0.4);
 }
 
-/* Ẩn cứng */
+/* Ẩn */
 .hidden {
     display: none;
 }
 
-/* Ẩn mềm */
 .hidden-soft {
     opacity: 0;
     pointer-events: none;
@@ -88,16 +89,25 @@ body {
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 1;
+    z-index: 5;
 }
 
 /* Hoa mai */
 .mayflower {
     position: fixed;
     top: -40px;
-    width: 35px;
+    width: 32px;
     animation: fall linear infinite;
-    z-index: 2;
+    z-index: 3;
+}
+
+/* Đồ ăn */
+.food-floating {
+    position: fixed;
+    top: -50px;
+    width: 42px;
+    animation: fall linear;
+    z-index: 3;
 }
 
 @keyframes fall {
@@ -106,92 +116,9 @@ body {
     }
 }
 
-/* Đồ ăn */
-.food-floating {
-    position: fixed;
-    top: -50px;
-    width: 50px;
-    animation: fall linear;
-    z-index: 2;
-}
-
-/* Text Ich vermisse dich */
-#miss-text {
-    position: fixed;
-    top: 45%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 36px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-shadow: 0 0 12px rgba(255,255,255,0.9);
-    z-index: 20;
-    max-width: 92vw;
-    text-align: center;
-    word-break: break-word;
-}
-
-/* Valentine Easter Egg */
-.valentine-text {
-    position: fixed;
-    top: 56%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 22px;
-    font-weight: 500;
-    letter-spacing: 1.5px;
-    color: #ffd6e8;
-    text-shadow:
-        0 0 6px rgba(255,105,180,.45),
-        0 0 14px rgba(255,105,180,.25);
-    max-width: 92vw;
-    text-align: center;
-    word-break: break-word;
-    pointer-events: none;
-    z-index: 30;
-}
-
-/* ================= MOBILE ================= */
+/* Mobile */
 @media (max-width: 768px) {
-    #heart {
-        width: 135px;
-        animation: heartbeat 0.85s infinite;
-    }
-
-    #envelope {
-        width: 170px;
-    }
-
-    #message-container {
-        margin-top: 7vh;
-        font-size: 15px;
-        padding: 0 10px 30px;
-    }
-
-    #miss-text {
-        font-size: 22px;
-        letter-spacing: 1px;
-    }
-
-    .valentine-text {
-        font-size: 18px;
-    }
-
-    #couple-img {
-        border-radius: 12px;
-        margin-top: 10px;
-    }
-
-    .mayflower {
-        width: 24px;
-    }
-
-    .food-floating {
-        width: 32px;
-    }
-
-    canvas {
-        width: 100vw !important;
-        height: 100vh !important;
-    }
+    #heart { width: 130px; }
+    #envelope { width: 150px; }
+    #message-container p { font-size: 15px; }
 }
