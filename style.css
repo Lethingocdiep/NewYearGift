@@ -1,8 +1,7 @@
 body {
     margin: 0;
     background: #8b0000;
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: hidden;
     font-family: "Segoe UI", sans-serif;
     color: white;
 }
@@ -18,7 +17,7 @@ body {
 }
 
 #heart {
-    width: 200px;
+    width: 190px;
     animation: heartbeat 1s infinite;
 }
 
@@ -38,32 +37,45 @@ body {
 }
 
 #envelope {
-    width: 230px;
+    width: 220px;
     cursor: pointer;
 }
 
 /* ================= LỜI CHÚC ================= */
 #message-container {
-    position: relative;
-    margin: 120px auto 40px;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     text-align: center;
-    width: 92%;
+
+    padding: 18px 12px 20px;
+    box-sizing: border-box;
+
+    width: 100%;
     max-width: 520px;
-    line-height: 1.75;
+    margin: auto;
+
+    line-height: 1.65;
     text-shadow: 0 0 6px rgba(255,255,255,0.45);
     z-index: 8;
 }
 
-
+#greeting {
+    font-size: 15.5px;
+    margin: 0 0 12px;
+}
 
 /* ================= ẢNH ĐÔI ================= */
 #couple-img {
-    display: block;
     width: 100%;
-    height: auto;
+    max-height: 28vh;
+    object-fit: contain;
 
     border-radius: 18px;
-    margin: 18px auto 0;
+    margin-top: 10px;
 
     border: 2px solid gold;
     box-shadow:
@@ -95,7 +107,7 @@ body {
 .mayflower {
     position: fixed;
     top: -40px;
-    width: 35px;
+    width: 32px;
     animation: fall linear infinite;
 }
 
@@ -109,19 +121,38 @@ body {
 .food-floating {
     position: fixed;
     top: -50px;
-    width: 50px;
+    width: 46px;
     animation: fall linear;
 }
 
 /* ================= TEXT ICH VERMISSE DICH ================= */
 #miss-text {
     position: fixed;
-    top: 45%;
+    top: 46%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 36px;
+    font-size: 34px;
     font-weight: 600;
     letter-spacing: 2px;
-    text-shadow: 0 0 12px rgba(255,255,255,0.9);
+    text-shadow: 0 0 14px rgba(255,255,255,0.9);
     z-index: 20;
+}
+
+/* ================= MOBILE TỐI ƯU ================= */
+@media (max-width: 480px) {
+    #heart {
+        width: 165px;
+    }
+
+    #envelope {
+        width: 195px;
+    }
+
+    #greeting {
+        font-size: 14.8px;
+    }
+
+    #couple-img {
+        max-height: 26vh;
+    }
 }
