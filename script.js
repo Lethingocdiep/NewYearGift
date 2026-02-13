@@ -1,3 +1,4 @@
+
 /* ===================== DOM ===================== */
 const heartContainer = document.getElementById("heart-container");
 const heart = document.getElementById("heart");
@@ -37,7 +38,6 @@ let heartBeatCount = 0;
 let valentineShown = false;
 
 /* ===================== LOAD PAGE ===================== */
-heartContainer.classList.remove("hidden");
 envelopeContainer.classList.add("hidden");
 messageContainer.classList.add("hidden");
 
@@ -48,7 +48,6 @@ heartContainer.addEventListener("click", () => {
 
     heartContainer.classList.add("hidden");
     envelopeContainer.classList.remove("hidden");
-    messageContainer.classList.add("hidden");
 
     createMaiRain();
     startFoodRain();
@@ -92,15 +91,19 @@ function startMissTextSequence() {
     if (isTextMode) return;
     isTextMode = true;
 
+    // reset Easter Egg mỗi lần quay lại tab
     heartBeatCount = 0;
     valentineShown = false;
 
     messageContainer.classList.add("hidden-soft");
     generateText("Ich vermisse dich");
 
+    // ❤️ giả lập 14 nhịp tim trong ~4s
     const beatInterval = setInterval(() => {
         heartFirework();
-        if (heartBeatCount >= 14) clearInterval(beatInterval);
+        if (heartBeatCount >= 14) {
+            clearInterval(beatInterval);
+        }
     }, 280);
 
     setTimeout(() => {
@@ -243,20 +246,22 @@ function showValentineText() {
     const text = document.createElement("div");
     text.textContent = "happy valentine anh iu 💘";
 
-    Object.assign(text.style, {
-        position: "fixed",
-        top: "56%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        fontSize: "22px",
-        letterSpacing: "1.5px",
-        color: "#ffd6e8",
-        opacity: "0",
-        transition: "opacity 1.4s ease",
-        pointerEvents: "none",
-        zIndex: "30",
-        textShadow: "0 0 6px rgba(255,105,180,.45), 0 0 14px rgba(255,105,180,.25)"
-    });
+    text.style.position = "fixed";
+    text.style.top = "56%";
+    text.style.left = "50%";
+    text.style.transform = "translate(-50%, -50%)";
+    text.style.fontSize = "22px";
+    text.style.fontWeight = "500";
+    text.style.letterSpacing = "1.5px";
+    text.style.color = "#ffd6e8";
+    text.style.opacity = "0";
+    text.style.textShadow = `
+        0 0 6px rgba(255,105,180,.45),
+        0 0 14px rgba(255,105,180,.25)
+    `;
+    text.style.transition = "opacity 1.4s ease";
+    text.style.pointerEvents = "none";
+    text.style.zIndex = "30";
 
     document.body.appendChild(text);
 
@@ -277,7 +282,9 @@ function drawDot(x, y, color) {
 }
 
 function randomColor() {
-    return ["#ff4d4d", "#ffd700", "#ff66cc", "#ffffff"][Math.floor(Math.random() * 4)];
+    return ["#ff4d4d", "#ffd700", "#ff66cc", "#ffffff"][
+        Math.floor(Math.random() * 4)
+    ];
 }
 
 /* ===================== LOOP ===================== */
