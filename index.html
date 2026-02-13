@@ -8,19 +8,17 @@
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
 </head>
 <body>
-    <!-- Container trái tim -->
     <div id="heart-container">
         <img id="heart" src="images/heart.png" alt="heart">
     </div>
 
-    <!-- Container phong bao -->
     <div id="envelope-container" class="hidden">
         <img id="envelope" src="images/envelope.png" alt="envelope">
     </div>
 
-    <!-- Message -->
     <div id="message-container" class="hidden">
-        <p id="greeting">
+        <div id="inner-message">
+            <p id="greeting">
 Anh ở nơi xa, còn em gom cả mùa Tết quê mình để gửi sang cho anh từng chút một: 
 mùi mai vàng, tiếng pháo giao thừa,
 đến cả nồi thịt kho hột vịt thơm ấm và đòn bánh tét xanh mềm quen thuộc… 💛✨<br><br>
@@ -34,26 +32,17 @@ Năm sau mình đoàn tụ,
 
 Em yêu anh… đến mức Tết cũng hóa thành nỗi nhớ mang tên anh 💛
 Hy vọng món quà nhỏ này giúp anh ấm lòng hơn một chút 🍲💛
-        </p>
-
-        <img id="couple-img" src="images/couple.png" alt="couple">
+            </p>
+            <img id="couple-img" src="images/couple.png" alt="couple">
+        </div>
     </div>
 
-    <!-- Canvas pháo hoa -->
+    <div id="easter-egg-container"></div>
     <canvas id="fireworks-canvas"></canvas>
 
-    <!-- Preload audio -->
-    <audio id="backgroundMusic" src="audio/background.mp3" preload="auto"></audio>
+    <audio id="backgroundMusic" src="audio/background.mp3" preload="auto" loop></audio>
     <audio id="fireworksSound" src="audio/fireworks.mp3" preload="auto"></audio>
     <audio id="popSound" src="audio/pop.mp3" preload="auto"></audio>
-
-    <!-- Preload images -->
-    <img src="images/mai.png" style="display:none">
-    <img src="images/heart.png" style="display:none">
-    <img src="images/envelope.png" style="display:none">
-    <img src="images/couple.png" style="display:none">
-    <img src="images/thit_kho.png" style="display:none">
-    <img src="images/banh_tet.png" style="display:none">
 
     <script src="script.js"></script>
 </body>
